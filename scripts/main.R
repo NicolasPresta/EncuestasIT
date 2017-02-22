@@ -221,23 +221,6 @@ table(encuestas$TienePersonasACargo)
 
 
 
-# ---------------------- Creación de caracteristicas  ---------------------- 
-
-encuestas$DiferenciaSalarioRealIdeal <- encuestas$SalarioIdealNeto - encuestas$SalarioActualNeto
-
-
-encuestas$SalarioNetoPorHora <- encuestas$SalarioActualNeto / encuestas$horasTrabajadasXSemana
-
-# Carga laboral: En relación a las horas que dedica al trabajo
-encuestas$CargaLaboral <- cut(encuestas$horasTrabajadasXSemana, 5, labels = c("Part Time", "Full Time", "Extra Time", "Very Extra Time", "Extreme Time"))
-
-# Antiguedad: Nivel de antiguedad en el actual trabajo
-encuestas$Antiguedad <- cut(encuestas$MesesEnElPuestoActual,quantile(encuestas$MesesEnElPuestoActual,(0:4)/4), labels = c("Junior", "SemiSenior", "Senior", "Expert"))
-
-# Experiencia: Nivel de antiguedad en cualquier trabajo
-encuestas$Experiencia <- cut(encuestas$MesesDeExperiencia,quantile(encuestas$MesesDeExperiencia,(0:4)/4), labels = c("Junior", "SemiSenior", "Senior", "Expert"))
-
-
 # ---------------------- Limpieza de valores anomalos  ---------------------- 
 
 # todas las (edad > 65) las vamos a considerar anomalas y vamos a desechar esos registros
@@ -266,6 +249,28 @@ encuestas <- encuestas[encuestas$SalarioIdealNeto < 150000, ]
 hist(encuestas$SalarioIdealNeto)
 rug(encuestas$SalarioIdealNeto)
 
+
+# Borramos los levels que no se usan
+encuestas <- droplevels(encuestas)
+
+
+# ---------------------- Creación de caracteristicas  ---------------------- 
+
+encuestas$DiferenciaSalarioRealIdeal <- encuestas$SalarioIdealNeto - encuestas$SalarioActualNeto
+
+encuestas$SalarioNetoPorHora <- encuestas$SalarioActualNeto / encuestas$horasTrabajadasXSemana
+
+# Carga laboral: En relación a las horas que dedica al trabajo
+encuestas$CargaLaboral <- cut(encuestas$horasTrabajadasXSemana, 5, labels = c("Part Time", "Full Time", "Extra Time", "Very Extra Time", "Extreme Time"))
+
+# Antiguedad: Nivel de antiguedad en el actual trabajo
+encuestas$Antiguedad <- cut(encuestas$MesesEnElPuestoActual,quantile(encuestas$MesesEnElPuestoActual,(0:4)/4), labels = c("Junior", "SemiSenior", "Senior", "Expert"))
+
+# Experiencia: Nivel de antiguedad en cualquier trabajo
+encuestas$Experiencia <- cut(encuestas$MesesDeExperiencia,quantile(encuestas$MesesDeExperiencia,(0:4)/4), labels = c("Junior", "SemiSenior", "Senior", "Expert"))
+
+# ---------------------- Limpieza de valores anomalos en caracteristicas creadas  ---------------------- 
+
 # Todas las diferencias de salario real e ideal mayores a 25000 y menores a -5000 las eliminamos
 # Por considerarlas anomalas.
 encuestas <- encuestas[encuestas$DiferenciaSalarioRealIdeal < 25000, ]
@@ -282,7 +287,6 @@ rug(encuestas$SalarioNetoPorHora)
 # Todos los "Extreme Time" los vamos a borrar por no ser representativos
 encuestas <- encuestas[encuestas$CargaLaboral != "Extreme Time", ]
 table(encuestas$CargaLaboral)
-
 
 # Borramos los levels que no se usan
 encuestas <- droplevels(encuestas)
@@ -314,13 +318,13 @@ par(mar=c(1,8,1,1))
 bymedian <- with(encuestas, reorder(CargaLaboral, -SalarioNetoPorHora, median))
 boxplot(SalarioNetoPorHora ~ bymedian, encuestas, horizontal = TRUE, las = 2, col="green")
 
-# distribución de sueldo netos por hora en función de la tecnologia
+# distribución de sueldo netos por hora en función de la experiencia
 par(mar=c(1,7,1,1))
 bymedian <- with(encuestas, reorder(Experiencia, -SalarioNetoPorHora, median))
 boxplot(SalarioNetoPorHora ~ bymedian, encuestas, horizontal = TRUE, las = 2, col="green")
 
 
-# distribución de sueldo netos por hora en función de la tecnologia
+# distribución de sueldo netos por hora en función de la antiguedad
 par(mar=c(1,7,1,1))
 bymedian <- with(encuestas, reorder(Antiguedad, -SalarioNetoPorHora, median))
 boxplot(SalarioNetoPorHora ~ bymedian, encuestas, horizontal = TRUE, las = 2, col="green")
