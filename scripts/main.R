@@ -219,6 +219,17 @@ table(encuestas$TienePersonasACargo)
 encuestas$TienePersonasACargo <- factor(encuestas$TienePersonasACargo, levels = c("", "True", "False"), labels = c("No informa", "Si", "No"))
 table(encuestas$TienePersonasACargo)
 
+# ---------------------- Ajuste de salarios por inflación  ---------------------- 
+
+# Vamos a crear 2 nuevas caracteristicas para cada valor monetario,
+# Uno es el valor expresado en Dolares a la fecha de la encuesta
+# Otro es el valor expresado en Pesos aplicando el indice de inflación a enero del 2017
+
+# Para el valor del dolar en cada fecha se tomará el valor oficial.
+# Para el valor ajustado por inflaciòn se tomará la inflación oficial y la inflación congreso
+
+
+## TODO
 
 
 # ---------------------- Limpieza de valores anomalos  ---------------------- 
@@ -249,6 +260,10 @@ encuestas <- encuestas[encuestas$SalarioIdealNeto < 150000, ]
 hist(encuestas$SalarioIdealNeto)
 rug(encuestas$SalarioIdealNeto)
 
+# todos los (Edad < 17 y Edad > 0) los vamos a considerar anomalas y vamos a desechar esos registros
+encuestas <- encuestas[encuestas$Edad == 0 | encuestas$Edad > 17, ]
+hist(encuestas$Edad)
+rug(encuestas$Edad)
 
 # Borramos los levels que no se usan
 encuestas <- droplevels(encuestas)
@@ -269,6 +284,9 @@ encuestas$Antiguedad <- cut(encuestas$MesesEnElPuestoActual,quantile(encuestas$M
 # Experiencia: Nivel de antiguedad en cualquier trabajo
 encuestas$Experiencia <- cut(encuestas$MesesDeExperiencia,quantile(encuestas$MesesDeExperiencia,(0:4)/4), labels = c("Junior", "SemiSenior", "Senior", "Expert"))
 
+# RangoEdad: Rango de edad en el que se ubica
+encuestas$RangoEdad <- cut(encuestas$Edad, c(0, 1, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65), labels = c("No Informa", "20", "20-25", "25-30", "30-35", "35-40", "40-45", "45-50", "50-55", "55-60", "60-65"))
+
 # ---------------------- Limpieza de valores anomalos en caracteristicas creadas  ---------------------- 
 
 # Todas las diferencias de salario real e ideal mayores a 25000 y menores a -5000 las eliminamos
@@ -283,7 +301,6 @@ encuestas <- encuestas[encuestas$SalarioNetoPorHora < 1500, ]
 hist(encuestas$SalarioNetoPorHora)
 rug(encuestas$SalarioNetoPorHora)
 
-
 # Todos los "Extreme Time" los vamos a borrar por no ser representativos
 encuestas <- encuestas[encuestas$CargaLaboral != "Extreme Time", ]
 table(encuestas$CargaLaboral)
@@ -294,57 +311,60 @@ encuestas <- droplevels(encuestas)
 # ---------------------- Exploración grafica ----------------------
 
 # distribución de sueldo netos por hora en función del puesto
-par(mar=c(1,18,1,1))
+par(mar=c(5,18,1,1))
 bymedian <- with(encuestas, reorder(IdPuesto, -SalarioNetoPorHora, median))
 boxplot(SalarioNetoPorHora ~ bymedian, encuestas, horizontal = TRUE, las = 2, col="green")
 
 # distribución de sueldo netos por hora en función del nivel educativo
-par(mar=c(1,15,1,1))
+par(mar=c(5,15,1,1))
 bymedian <- with(encuestas, reorder(IdNivelEducativo, -SalarioNetoPorHora, median))
 boxplot(SalarioNetoPorHora ~ bymedian, encuestas, horizontal = TRUE, las = 2, col="green")
 
 # distribución de sueldo netos por hora en función del sexo
-par(mar=c(1,10,1,1))
-bymedian <- with(encuestas, reorder(IdSexo, -SalarioNetoPorHora, median))
-boxplot(SalarioNetoPorHora ~ bymedian, encuestas, horizontal = TRUE, las = 2, col="green")
-
-# distribución de sueldo netos por hora en función del sexo
-par(mar=c(1,10,1,1))
+par(mar=c(5,10,1,1))
 bymedian <- with(encuestas, reorder(IdSexo, -SalarioNetoPorHora, median))
 boxplot(SalarioNetoPorHora ~ bymedian, encuestas, horizontal = TRUE, las = 2, col="green")
 
 # distribución de sueldo netos por hora en función de las horas trabajadas por semana
-par(mar=c(1,8,1,1))
+par(mar=c(5,8,1,1))
 bymedian <- with(encuestas, reorder(CargaLaboral, -SalarioNetoPorHora, median))
 boxplot(SalarioNetoPorHora ~ bymedian, encuestas, horizontal = TRUE, las = 2, col="green")
 
 # distribución de sueldo netos por hora en función de la experiencia
-par(mar=c(1,7,1,1))
+par(mar=c(5,7,1,1))
 bymedian <- with(encuestas, reorder(Experiencia, -SalarioNetoPorHora, median))
 boxplot(SalarioNetoPorHora ~ bymedian, encuestas, horizontal = TRUE, las = 2, col="green")
 
 
 # distribución de sueldo netos por hora en función de la antiguedad
-par(mar=c(1,7,1,1))
+par(mar=c(5,7,1,1))
 bymedian <- with(encuestas, reorder(Antiguedad, -SalarioNetoPorHora, median))
 boxplot(SalarioNetoPorHora ~ bymedian, encuestas, horizontal = TRUE, las = 2, col="green")
 
 
 # distribución de sueldo netos por hora en función de la tecnologia
-par(mar=c(1,7,1,1))
+par(mar=c(5,7,1,1))
 bymedian <- with(encuestas, reorder(IdTecnologiaPrincipal, -SalarioNetoPorHora, median))
 boxplot(SalarioNetoPorHora ~ bymedian, encuestas, horizontal = TRUE, las = 2, col="green")
 
+
+# distribución de sueldo netos por hora en función de la Edad
+par(mar=c(5,7,1,1))
+bymedian <- with(encuestas, reorder(RangoEdad, -SalarioNetoPorHora, median))
+boxplot(SalarioNetoPorHora ~ bymedian, encuestas, horizontal = TRUE, las = 2, col="green")
 
 
 # Veamos la relación entre el salario y la antiguedad, para puestos bajos y medios
 with(subset(encuestas, SalarioActualNeto < 40000), plot(SalarioActualNeto, MesesEnElPuestoActual) )
 
-# Veamos la relación entre el salario y la edad, para puestos bajos y medios
-with(subset(encuestas, SalarioActualNeto < 40000), plot(SalarioActualNeto, Edad) )
-# Hay una correlación, aunque se ameceta luego de los 40
 
-# veamos el salario medio para cada nivel educativo
+# Veamos la relación entre el salario y la edad, para el año 2013, discriminado por sexo
+with(subset(encuestas, Fecha$year == 113 & Edad > 1 & IdSexo == "Masculino"), plot(SalarioNetoPorHora, Edad))
+with(subset(encuestas, Fecha$year == 113 & Edad > 1 & IdSexo == "Femenino"), points(SalarioNetoPorHora, Edad, col="red"))
+model <- lm(Edad ~ SalarioNetoPorHora, subset(encuestas, Fecha$year == 113 & Edad > 1 & IdSexo == "Masculino"))
+abline(model, lwd = 2)
+model <- lm(Edad ~ SalarioNetoPorHora, subset(encuestas, Fecha$year == 113 & Edad > 1 & IdSexo == "Femenino"))
+abline(model, lwd = 2, col="red")
 
 
 
