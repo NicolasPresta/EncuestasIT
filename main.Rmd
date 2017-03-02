@@ -334,21 +334,21 @@ encuestas <- droplevels(encuestas)
 
 # ---------------------- Creación de caracteristicas  ---------------------- 
 
-encuestas$Anio <- encuestas$Fecha$year + 1900
-encuestas$AnioMes <- (encuestas$Fecha$year + 1900) * 100 + encuestas$Fecha$mon + 1
+encuestas$Anio <- factor(encuestas$Fecha$year + 1900)
+encuestas$AnioMes <- factor((encuestas$Fecha$year + 1900) * 100 + encuestas$Fecha$mon + 1)
 
 encuestas$DiferenciaSalarioRealIdeal <- encuestas$SalarioIdealNeto - encuestas$SalarioActualNeto
 
 encuestas$SalarioNetoPorHora <- encuestas$SalarioActualNeto / encuestas$horasTrabajadasXSemana
 
 # Carga laboral: En relación a las horas que dedica al trabajo
-encuestas$CargaLaboral <- cut(encuestas$horasTrabajadasXSemana, 5, labels = c("Part Time", "Full Time", "Extra Time", "Very Extra Time", "Extreme Time"))
+encuestas$CargaLaboral <- cut(encuestas$horasTrabajadasXSemana, c(0, 35, 45, 50, 999), labels = c("Part Time", "Full Time", "Extra Time", "Very Extra Time"))
 
 # Antiguedad: Nivel de antiguedad en el actual trabajo
-encuestas$Antiguedad <- cut(encuestas$MesesEnElPuestoActual,quantile(encuestas$MesesEnElPuestoActual,(0:4)/4), labels = c("Junior", "SemiSenior", "Senior", "Expert"))
+encuestas$Antiguedad <- cut(encuestas$MesesEnElPuestoActual,c(0, 18, 36, 60, 999), labels = c("Junior", "SemiSenior", "Senior", "Expert"))
 
 # Experiencia: Nivel de antiguedad en cualquier trabajo
-encuestas$Experiencia <- cut(encuestas$MesesDeExperiencia,quantile(encuestas$MesesDeExperiencia,(0:4)/4), labels = c("Junior", "SemiSenior", "Senior", "Expert"))
+encuestas$Experiencia <- cut(encuestas$MesesDeExperiencia,c(0, 18, 36, 60, 999), labels = c("Junior", "SemiSenior", "Senior", "Expert"))
 
 ```
 
@@ -372,10 +372,6 @@ encuestas <- encuestas[encuestas$SalarioNetoPorHora < 1500, ]
 hist(encuestas$SalarioNetoPorHora)
 rug(encuestas$SalarioNetoPorHora)
 
-
-# Todos los "Extreme Time" los vamos a borrar por no ser representativos
-encuestas <- encuestas[encuestas$CargaLaboral != "Extreme Time", ]
-table(encuestas$CargaLaboral)
 
 # Borramos los levels que no se usan
 encuestas <- droplevels(encuestas)
