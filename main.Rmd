@@ -6,6 +6,7 @@ output: github_document
 
 ```{r setup, include=FALSE}
 library(knitr)
+library(lattice)
 
 opts_chunk$set(echo = TRUE, message = TRUE, warning = TRUE)
 
@@ -34,7 +35,7 @@ Todo el trabajo fue realizado con la autorización de los creadores del sitio [e
 
 ### Los objetivos de este trabajo son:
 * Fomentar el uso de herramientas de analisís de datos
-* ...
+* ... TODO
 * ...
 
 
@@ -333,6 +334,9 @@ encuestas <- droplevels(encuestas)
 
 # ---------------------- Creación de caracteristicas  ---------------------- 
 
+encuestas$Anio <- encuestas$Fecha$year + 1900
+encuestas$AnioMes <- (encuestas$Fecha$year + 1900) * 100 + encuestas$Fecha$mon + 1
+
 encuestas$DiferenciaSalarioRealIdeal <- encuestas$SalarioIdealNeto - encuestas$SalarioActualNeto
 
 encuestas$SalarioNetoPorHora <- encuestas$SalarioActualNeto / encuestas$horasTrabajadasXSemana
@@ -420,4 +424,6 @@ par(mar=c(3,7,1,1))
 bymedian <- with(encuestas, reorder(IdTecnologiaPrincipal, -SalarioNetoPorHora, median))
 boxplot(SalarioNetoPorHora ~ bymedian, encuestas, horizontal = TRUE, las = 2, col="green")
 ```
+
+
 
