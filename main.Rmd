@@ -7,8 +7,13 @@ output: github_document
 ```{r setup, include=FALSE}
 library(knitr)
 library(lattice)
+library(ggplot2)
 
-opts_chunk$set(echo = TRUE, message = TRUE, warning = TRUE)
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = TRUE,
+	warning = TRUE
+)
 
 # ----------------------  Importamos funciones  ----------------------  
 
@@ -33,10 +38,10 @@ Los datos en crudo de las encuestas están disponibles en el sitio, en la secci�
 Todo el trabajo fue realizado con la autorización de los creadores del sitio [encuestasIt](http://www.encuestasit.com/)
 
 
-### Los objetivos de este trabajo son:
-* Fomentar el uso de herramientas de analisís de datos
-* ... TODO
-* ...
+### Los objetivos de este trabajo son puramente academicos e incluyen:
+* Utilizar tecnicas de exploración de datos para encontrar relaciones de interes entre las variables.
+* Fomentar el uso de herramientas de analisís de datos.
+* Demostrar la capacidad de R para la exploración y analisis de datos y para elaborar informes claros.
 
 
 ## Indice
@@ -68,7 +73,7 @@ if(!file.exists(FILE_TABLAS))
 
 ## Preprocesado de datos
 
-Los datos están en formato CSV. Se espera es que cada linea sea un regitro y cada atributo está separado por una ",". 
+Los datos están en formato CSV. Se espera es que cada linea sea un regitro y cada atributo esté separado por una ",". 
 
 Hasta la versión publicada al 23/02/2017 ocurre un problema grave en el formato del documento, ya que uno de los campos (*Observaciones*) es de texto libre y no se encuentra "sanitizado" por lo que dentro del mismo puden haber "," y saltos de linea, lo que arruina el formato del documento. Algo similiar ocurre con el campo *Medio para buscar trabajo* que tiene valores separados por ","
 
@@ -93,10 +98,9 @@ txtdata <- quitarSaltosLineaComentarios(txtdata)
 txtdata <- gsub(", ,", ",,", txtdata)
 # y los ",  ," por ",,"
 txtdata <- gsub(",  ,", ",,", txtdata)
-# y los ", \r\n" por ","
-txtdata <- gsub(", \r\n", ",\r\n", txtdata)
-# y los ",  \r\n" por ","
-txtdata <- gsub(",  \r\n", ",\r\n", txtdata)
+
+# quitamos los espacios al final de cada linea (trim end)
+txtdata <- gsub("\\s+$", "", txtdata)
 
 # Quitamos los ",False, " y lo reemplazamos por ",False," (3 veces por si hay varios espacios)
 txtdata <- gsub(",False, ", ",False,", txtdata)
@@ -107,6 +111,9 @@ txtdata <- gsub(",False,   ", ",False,", txtdata)
 txtdata <- gsub(",True, ", ",True,", txtdata)
 txtdata <- gsub(",True,  ", ",True,", txtdata)
 txtdata <- gsub(",True,   ", ",True,", txtdata)
+
+# Quitamos los ", " y lo reemplazamos por " "
+txtdata <- gsub(", ", " ", txtdata)
 
 # Quitamos los ", " y lo reemplazamos por " "
 txtdata <- gsub(", ", " ", txtdata)
@@ -125,8 +132,10 @@ Cantidad de renglones total: `R length(txtdata)`
 Cantidad de renglones inconsistentes: `R length(renglonesInconsistentes)`
 Cantidad de renglones consistentes: `R length(renglonesConsistentes)`
 
-Vemos que existen muchos registros que no se pueden formatear bien.  
+Vemos que existen algunos registros que no se pueden formatear bien.  
+Por ser una cantidad poco significativa no le vamos a dar tratamiento a esos registros por el momento.
 
+> TODO: Darle tratamiento a los registros inconsistentes para dejarlos consistentes.
 > Queda como mejora revisar estos registros para darle el correcto formato.
 
 ```{r grabación de archivos procesados}
@@ -185,9 +194,8 @@ kable(na_count, caption="Cantidad de valores faltantes por columna")
 
 ```
 
-Con esto ya no tenemos valores faltantes en nuestro DataSet.
 
-## Filtrado de datos: Solo incluimos Argentina.
+## Filtrado de datos por ubicación: Solo incluimos Argentina.
 
 Restringimos el dominio del analisís a Argentina.
 Para este analisís nos centraremos en los datos de un solo país. 
@@ -196,7 +204,7 @@ Para este analisís nos centraremos en los datos de un solo país.
 > Se puede cambiar esto para que el analisís sea con datos de otro país, pero hay fenomenos monetarios
 > que son propios de cada nación (inflación, tipo de cambio) que deben ser analisados en detalle en cada caso
 
-```{r}
+```{r Filtrado de datos por ubicación, echo=TRUE}
 
 # Nos quedamos solo con los de Argentina, ya que para este estudio no nos interesa el resto. 
 # Ademas sus salarios están expresados en moneda local de cada país, lo que requeriria una conversión
@@ -206,6 +214,18 @@ encuestas$IdPais <- NULL
 
 ```
 
+## Filtrado de datos por año: Solo incluimos 2016
+
+El analisis será solo por un año en especifico.
+
+> El año puede cambiar para obtener el mismo analisís para otros años
+
+```{r Filtrado de datos por año, echo=TRUE}
+
+#encuestasCompleto <- encuestas
+#encuestas <- subset(encuestas, as.POSIXlt(Fecha)$year + 1900 == 2016 )
+
+```
 
 ## Ajuste de tipos de dato
 
@@ -231,11 +251,17 @@ tabla_provincia <- read.table(FILE_TABLAS, header = TRUE, sep="\t", nrows = 413,
 tabla_puesto <- read.table(FILE_TABLAS, header = TRUE, sep="\t", nrows = 95, skip=446)
 tabla_tecnologia <- read.table(FILE_TABLAS, header = TRUE, sep="\t", nrows = 72, skip=544)
 
+
 # Quitamos las provincias que no sean de argentina
 tabla_provincia <- tabla_provincia[tabla_provincia$IdPais == 1, ]
 
-# Seteamos los factors
 
+# Seteamos los factors
+encuestas$SeSienteMotivado <- factor(encuestas$SeSienteMotivado)
+encuestas$SeLoReconoceComoDebiera <- factor(encuestas$SeLoReconoceComoDebiera)
+encuestas$SeSientePresionado <- factor(encuestas$SeSientePresionado)
+encuestas$SeSienteSobreexigido <- factor(encuestas$SeSienteSobreexigido)
+     
 encuestas$IdSexo <- factor(encuestas$IdSexo, levels = tabla_sexo$IdSexo, labels = tabla_sexo$Nombre)
 kable(as.data.frame(table(encuestas$IdSexo)), caption="Cantidad de registros por sexo")
 
@@ -292,40 +318,79 @@ kable(as.data.frame(table(encuestas$TienePersonasACargo)), caption="Cantidad de 
 
 ```{r Limpieza de valores anomalos}
 
+cantRegistrosAntesLimpieza <- dim(encuestas)[1]
+
 # ---------------------- Limpieza de valores anomalos  ---------------------- 
 
-# todas las (edad > 65) las vamos a considerar anomalas y vamos a desechar esos registros
-encuestas <- encuestas[encuestas$Edad < 66, ]
-hist(encuestas$Edad)
-rug(encuestas$Edad)
+# todas las (edad > 65 o < 18) las vamos a considerar anomalas y vamos a desechar esos registros
+ggplot(data=encuestas, aes(Edad)) + geom_histogram(aes(y =..density..)) +  geom_density(col=2) + labs(title="Histograma de edad - Antes de limpieza") 
 
-# todas las (horas trabajadas >= 120 o <= 18) las vamos a considerar anomalas y vamos a desechar esos registros
-encuestas <- encuestas[encuestas$horasTrabajadasXSemana < 120, ]
-encuestas <- encuestas[encuestas$horasTrabajadasXSemana > 18, ]
-hist(encuestas$horasTrabajadasXSemana)
-rug(encuestas$horasTrabajadasXSemana)
+encuestas <- encuestas[encuestas$Edad < 66, ]
+encuestas <- encuestas[encuestas$Edad > 17, ]
+
+ggplot(data=encuestas, aes(Edad)) + geom_histogram(aes(y =..density..)) +  geom_density(col=2) + labs(title="Histograma de edad - Después de limpieza") 
+
+cantAnomalosPorEdad <- cantRegistrosAntesLimpieza -  dim(encuestas)[1]
+
+# todas las (horas trabajadas >= 100 o <= 18) las vamos a considerar anomalas.
+# no vamos a desechar esos registros ya que son muchos, vamos a considerar que trabajan 40hs por semana
+# que es la media para la variable
+ggplot(data=encuestas, aes(horasTrabajadasXSemana)) + geom_histogram(aes(y =..density..)) +  geom_density(col=2) + labs(title="Histograma de horas trabajadas por semana - Antes de limpieza") 
+
+encuestas[encuestas$horasTrabajadasXSemana >= 100, ]$horasTrabajadasXSemana <- 40
+encuestas[encuestas$horasTrabajadasXSemana <= 18, ]$horasTrabajadasXSemana <- 40
+
+ggplot(data=encuestas, aes(horasTrabajadasXSemana)) + geom_histogram(aes(y =..density..)) +  geom_density(col=2) + labs(title="Histograma de horas trabajadas por semana - Después de limpieza") 
+
+cantAnomalosPorHorasTrabajadas <- cantRegistrosAntesLimpieza - cantAnomalosPorEdad -  dim(encuestas)[1]
 
 # todos los (meses en el puesto actual >= 360) los vamos a considerar anomalas y vamos a desechar esos registros
-encuestas <- encuestas[encuestas$MesesEnElPuestoActual < 480, ]
-hist(encuestas$MesesEnElPuestoActual)
-rug(encuestas$MesesEnElPuestoActual)
+ggplot(data=encuestas, aes(MesesEnElPuestoActual)) + geom_histogram(aes(y =..density..)) +  geom_density(col=2) + labs(title="Histograma de meses en puesto actual - Antes de limpieza") 
 
-# todos los (salario actual neto >= 150000) los vamos a considerar anomalas y vamos a desechar esos registros
+encuestas <- encuestas[encuestas$MesesEnElPuestoActual < 480, ]
+
+ggplot(data=encuestas, aes(MesesEnElPuestoActual)) + geom_histogram(aes(y =..density..)) +  geom_density(col=2) + labs(title="Histograma de meses en puesto actual - Después de limpieza") 
+
+cantAnomalosPorMesesEnPuestoActual <- cantRegistrosAntesLimpieza - cantAnomalosPorHorasTrabajadas - cantAnomalosPorEdad - dim(encuestas)[1]
+
+# todos los (salario actual neto >= 150000 o <= 7000) los vamos a considerar anomalas y vamos a desechar esos registros
+ggplot(data=encuestas, aes(SalarioActualNeto)) + geom_histogram(aes(y =..density..)) +  geom_density(col=2) + labs(title="Histograma de Salario actual neto - Antes de limpieza") 
+
 encuestas <- encuestas[encuestas$SalarioActualNeto < 150000, ]
-hist(encuestas$SalarioActualNeto)
-rug(encuestas$SalarioActualNeto)
+encuestas <- encuestas[encuestas$SalarioActualNeto > 7000, ]
+
+ggplot(data=encuestas, aes(SalarioActualNeto)) + geom_histogram(aes(y =..density..)) +  geom_density(col=2) + labs(title="Histograma de Salario actual neto - Después de limpieza") 
+
+cantAnomalosPorSalarioActualNeto <- cantRegistrosAntesLimpieza - cantAnomalosPorHorasTrabajadas - cantAnomalosPorEdad - cantAnomalosPorMesesEnPuestoActual - dim(encuestas)[1]
+
 
 # todos los (salario ideal neto >= 150000) los vamos a considerar anomalas y vamos a desechar esos registros
+ggplot(data=encuestas, aes(SalarioIdealNeto)) + geom_histogram(aes(y =..density..)) +  geom_density(col=2) + labs(title="Histograma de Salario ideal neto - Antes de limpieza") 
+
 encuestas <- encuestas[encuestas$SalarioIdealNeto < 150000, ]
-hist(encuestas$SalarioIdealNeto)
-rug(encuestas$SalarioIdealNeto)
+
+ggplot(data=encuestas, aes(SalarioIdealNeto)) + geom_histogram(aes(y =..density..)) +  geom_density(col=2) + labs(title="Histograma de Salario ideal neto - Después de limpieza") 
+
+cantAnomalosPorSalarioIdealNeto <- cantRegistrosAntesLimpieza - cantAnomalosPorHorasTrabajadas - cantAnomalosPorEdad - cantAnomalosPorMesesEnPuestoActual - cantAnomalosPorSalarioActualNeto - dim(encuestas)[1]
 
 
 # Borramos los levels que no se usan
 encuestas <- droplevels(encuestas)
 
+cantRegistrosDespuesLimpieza <- dim(encuestas)[1]
+
 ```
 
+Cantidad de registros anomalos por edad: `R cantAnomalosPorEdad`
+Cantidad de registros anomalos por horas trabajadas: `R cantAnomalosPorHorasTrabajadas`
+Cantidad de registros anomalos por meses en el puesto actual: `R cantAnomalosPorMesesEnPuestoActual`
+Cantidad de registros anomalos por salario actual neto: `R cantAnomalosPorSalarioActualNeto`
+Cantidad de registros anomalos por salario ideal neto: `R cantAnomalosPorSalarioIdealNeto`
+
+
+Cantidad de registros antes de limpieza: `R cantRegistrosAntesLimpieza`
+Cantidad de registros despues de limpieza: `R cantRegistrosDespuesLimpieza`
+Cantidad de registros anomalos eliminados: `R (cantRegistrosAntesLimpieza - cantRegistrosDespuesLimpieza)`
 
 ## Creación de caracteristicas
 
@@ -334,12 +399,32 @@ encuestas <- droplevels(encuestas)
 
 # ---------------------- Creación de caracteristicas  ---------------------- 
 
+# Anio: Factor del año 
 encuestas$Anio <- factor(encuestas$Fecha$year + 1900)
+
+# Mes: Factor del  Mes
+encuestas$Mes <- factor(encuestas$Fecha$mon + 1)
+
+# AnioMes: Factor del Año + Mes
 encuestas$AnioMes <- factor((encuestas$Fecha$year + 1900) * 100 + encuestas$Fecha$mon + 1)
 
+# Semestre: Factor del semestre
+encuestas$Semestre <- cut(encuestas$Fecha$mon + 1, c(0, 6, 99), labels = c("Primer", "Segundo"))
+
+# Hora: Factor de la hora
+encuestas$Hora <- factor(encuestas$Fecha$hour)
+
+# RangoHora: Factor por el momento del día de la encuesta
+encuestas$RangoHora <- cut(encuestas$Fecha$hour, c(0, 6, 10, 14, 19, 24), labels = c("Madrugada", "Mañana", "Mediodia", "Tarde", "Noche"))
+
+# DiferenciaSalarioRealIdeal: Diferencia entre el salario actual y el ideal
 encuestas$DiferenciaSalarioRealIdeal <- encuestas$SalarioIdealNeto - encuestas$SalarioActualNeto
 
+# SalarioNetoPorHora: Salario neto por hora trabajada por semana
 encuestas$SalarioNetoPorHora <- encuestas$SalarioActualNeto / encuestas$horasTrabajadasXSemana
+
+# RangoSalario: Rango del nivel remunerativo
+encuestas$RangoSalario  <- cut(encuestas$SalarioNetoPorHora ,quantile(encuestas$SalarioNetoPorHora ,c(0, 0.15, 0.30, 0.70, 0.90, 1 )), labels = c("Muy Bajo", "Bajo", "Medio", "Alto", "Muy Alto"))
 
 # Carga laboral: En relación a las horas que dedica al trabajo
 encuestas$CargaLaboral <- cut(encuestas$horasTrabajadasXSemana, c(0, 35, 45, 50, 999), labels = c("Part Time", "Full Time", "Extra Time", "Very Extra Time"))
@@ -348,7 +433,10 @@ encuestas$CargaLaboral <- cut(encuestas$horasTrabajadasXSemana, c(0, 35, 45, 50,
 encuestas$Antiguedad <- cut(encuestas$MesesEnElPuestoActual,c(0, 18, 36, 60, 999), labels = c("Junior", "SemiSenior", "Senior", "Expert"))
 
 # Experiencia: Nivel de antiguedad en cualquier trabajo
-encuestas$Experiencia <- cut(encuestas$MesesDeExperiencia,c(0, 18, 36, 60, 999), labels = c("Junior", "SemiSenior", "Senior", "Expert"))
+encuestas$Experiencia <- cut(encuestas$MesesDeExperiencia,c(0, 25, 70, 110, 999), labels = c("Junior", "SemiSenior", "Senior", "Expert"))
+
+# IdEdad: Rango de edad
+encuestas$RangoEdad <- cut(encuestas$Edad,c(0, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65))
 
 ```
 
@@ -360,24 +448,77 @@ encuestas$Experiencia <- cut(encuestas$MesesDeExperiencia,c(0, 18, 36, 60, 999),
 
 # ---------------------- Limpieza de valores anomalos en caracteristicas creadas  ---------------------- 
 
-# Todas las diferencias de salario real e ideal mayores a 25000 y menores a -5000 las eliminamos
+# Todas las diferencias de salario real e ideal mayores a 30000 y menores a -5000 las eliminamos
 # Por considerarlas anomalas.
-encuestas <- encuestas[encuestas$DiferenciaSalarioRealIdeal < 25000, ]
+ggplot(data=encuestas, aes(DiferenciaSalarioRealIdeal)) + geom_histogram(aes(y =..density..)) +  geom_density(col=2) + labs(title="Histograma de Diferencia entre salario real e ideal - Antes de limpieza") 
+
+encuestas <- encuestas[encuestas$DiferenciaSalarioRealIdeal < 30000, ]
 encuestas <- encuestas[encuestas$DiferenciaSalarioRealIdeal > -5000, ]
-hist(encuestas$DiferenciaSalarioRealIdeal)
-rug(encuestas$DiferenciaSalarioRealIdeal)
+
+ggplot(data=encuestas, aes(DiferenciaSalarioRealIdeal)) + geom_histogram(aes(y =..density..)) +  geom_density(col=2) + labs(title="Histograma de Diferencia entre salario real e ideal - Después de limpieza")
+
+cantAnomalosPorDiferenciaRealIdeal <- cantRegistrosDespuesLimpieza - dim(encuestas)[1]
 
 # Todos los salarios netos por hora mayores a 1500 los vamos a eliminar por considerarlos anomalos
-encuestas <- encuestas[encuestas$SalarioNetoPorHora < 1500, ]
-hist(encuestas$SalarioNetoPorHora)
-rug(encuestas$SalarioNetoPorHora)
+ggplot(data=encuestas, aes(SalarioNetoPorHora)) + geom_histogram(aes(y =..density..)) +  geom_density(col=2) + labs(title="Histograma de Salario neto por hora - Antes de limpieza") 
 
+encuestas <- encuestas[encuestas$SalarioNetoPorHora < 1500, ]
+
+ggplot(data=encuestas, aes(SalarioNetoPorHora)) + geom_histogram(aes(y =..density..)) +  geom_density(col=2) + labs(title="Histograma de Salario neto por hora - Después de limpieza") 
+
+cantAnomalosPorSalarioPorHora <- cantRegistrosDespuesLimpieza - cantAnomalosPorDiferenciaRealIdeal - dim(encuestas)[1]
 
 # Borramos los levels que no se usan
 encuestas <- droplevels(encuestas)
 
 ```
 
+Cantidad de registros anomalos por diferencia entre salario real e ideal : `R cantAnomalosPorDiferenciaRealIdeal`
+Cantidad de registros anomalos por salario neto por hora: `R cantAnomalosPorSalarioPorHora`
+
+## Visualización de caracteristicas principales
+
+```{r Visualización de caracteristicas principales, echo=TRUE}
+
+ggplot(encuestas,aes(x=Mes)) +  geom_bar(aes(fill=Semestre)) + labs(title="Cantidad de registros por mes") 
+
+# Vemos una gran cantidad de encuestas a principio de año y en el mes de septiembre. Esta lejos de ser una distribución pareja. Esto puede deverse a diversos motivos, como por ejemplo las fechas en las que se cierran paritarias o las fechas en donde se publican las encuestas.
+# Consejo: Sería una buena idea intentar aplanar un poco más está distribución.
+
+ggplot(encuestas,aes(x=Hora)) +  geom_bar(aes(fill=RangoHora)) + labs(title="Cantidad de registros por hora") 
+
+# Fuera de lo que se podria imaginar, hay una gran cantidad de registros que son a la madrugada. Esto puede indicar cierta anomalia en la recolección de la información. Tendremos que indagar un poco más la relación entre la valides teorica de la encuesta y la hora en la que se completó. 
+# Tambien puede ser por un desajuste en la hora del servidor de base de datos, entre otros motivos.
+
+ggplot(encuestas,aes(x=Hora, y=Edad)) +  geom_boxplot() + labs(title="Relación entre hora de encuesta y Edad") 
+
+ggplot(encuestas,aes(x=Hora, y=SalarioNetoPorHora)) +  geom_boxplot() + labs(title="Relación entre hora de encuesta y Salario") 
+
+ggplot(encuestas,aes(x=Hora)) +  geom_bar(aes(fill=IdNivelEducativo)) + labs(title="Relacón entre hora de encuesta y nivel educativo") 
+
+# No parece haber una relación entre la hora y la edad o salario recibido o nivel educativo. Eso es bueno ya que es sintoma de una encuesta valida.
+
+ggplot(encuestas,aes(x=SalarioActualNeto)) + 
+geom_histogram(aes(fill=RangoSalario)) + 
+facet_grid(.~Semestre) + 
+labs(title="Distribución de rangos salariales por semestre") 
+
+ggplot(encuestas,aes(x=SalarioNetoPorHora)) + 
+geom_histogram(aes(fill=RangoSalario)) + 
+facet_grid(.~Semestre) + 
+labs(title="Distribución de rangos salariales por semestre") 
+
+# Vemos que la grafica se corre a la derecha, producto de la inflación y los ajustes salariales
+
+ggplot(encuestas,aes(x=Edad)) +  geom_bar(aes(fill=RangoEdad)) + labs(title="Cantidad de registros por Edad") 
+
+ggplot(encuestas,aes(x=horasTrabajadasXSemana)) +  geom_bar(aes(fill=CargaLaboral)) + labs(title="Cantidad de registros por horas trabajadas por semana") 
+
+ggplot(encuestas,aes(x=MesesEnElPuestoActual)) +  geom_bar(aes(fill=Antiguedad)) + labs(title="Cantidad de registros por meses en el puesto actual") 
+
+ggplot(encuestas,aes(x=MesesDeExperiencia)) +  geom_bar(aes(fill=Experiencia)) + labs(title="Cantidad de registros por meses de experiencia") 
+
+```
 
 ## Exploración grafica
 
@@ -386,39 +527,46 @@ Algunos graficos de ejemplo:
 ```{r Exploración grafica, echo=TRUE}
 
 # distribución de sueldo netos por hora en función del puesto
-par(mar=c(3,18,1,1))
 bymedian <- with(encuestas, reorder(IdPuesto, -SalarioNetoPorHora, median))
-boxplot(SalarioNetoPorHora ~ bymedian, encuestas, horizontal = TRUE, las = 2, col="green")
+bwplot(bymedian ~ SalarioNetoPorHora, encuestas, horizontal = TRUE)
+
+# distribución de sueldo netos por hora en función del puesto
+# para sueldos mayores de $500 por hora
+bymedian <- with(subset(encuestas, SalarioNetoPorHora > 500), reorder(IdPuesto, -SalarioNetoPorHora, median))
+bwplot(bymedian ~ SalarioNetoPorHora, subset(encuestas, SalarioNetoPorHora > 500), horizontal = TRUE)
 
 # distribución de sueldo netos por hora en función del nivel educativo
-par(mar=c(3,15,1,1))
 bymedian <- with(encuestas, reorder(IdNivelEducativo, -SalarioNetoPorHora, median))
-boxplot(SalarioNetoPorHora ~ bymedian, encuestas, horizontal = TRUE, las = 2, col="green")
+bwplot(bymedian ~ SalarioNetoPorHora, encuestas, horizontal = TRUE)
 
 # distribución de sueldo netos por hora en función del sexo
-par(mar=c(3,10,1,1))
 bymedian <- with(encuestas, reorder(IdSexo, -SalarioNetoPorHora, median))
-boxplot(SalarioNetoPorHora ~ bymedian, encuestas, horizontal = TRUE, las = 2, col="green")
+bwplot(bymedian ~ SalarioNetoPorHora, encuestas, horizontal = TRUE)
 
 # distribución de sueldo netos por hora en función de las horas trabajadas por semana
-par(mar=c(3,8,1,1))
 bymedian <- with(encuestas, reorder(CargaLaboral, -SalarioNetoPorHora, median))
-boxplot(SalarioNetoPorHora ~ bymedian, encuestas, horizontal = TRUE, las = 2, col="green")
+bwplot(bymedian ~ SalarioNetoPorHora, encuestas, horizontal = TRUE)
 
 # distribución de sueldo netos por hora en función de la experiencia
-par(mar=c(3,7,1,1))
-bymedian <- with(encuestas, reorder(Experiencia, -SalarioNetoPorHora, median))
-boxplot(SalarioNetoPorHora ~ bymedian, encuestas, horizontal = TRUE, las = 2, col="green")
+bymedian <- with(encuestas, reorder(Experiencia, -SalarioActualNeto, median))
+bwplot(bymedian ~ SalarioActualNeto, encuestas, horizontal = TRUE)
 
 # distribución de sueldo netos por hora en función de la antiguedad
-par(mar=c(3,7,1,1))
-bymedian <- with(encuestas, reorder(Antiguedad, -SalarioNetoPorHora, median))
-boxplot(SalarioNetoPorHora ~ bymedian, encuestas, horizontal = TRUE, las = 2, col="green")
+bymedian <- with(encuestas, reorder(Antiguedad, -SalarioActualNeto, median))
+bwplot(bymedian ~ SalarioActualNeto, encuestas, horizontal = TRUE)
 
 # distribución de sueldo netos por hora en función de la tecnologia
-par(mar=c(3,7,1,1))
-bymedian <- with(encuestas, reorder(IdTecnologiaPrincipal, -SalarioNetoPorHora, median))
-boxplot(SalarioNetoPorHora ~ bymedian, encuestas, horizontal = TRUE, las = 2, col="green")
+bymedian <- with(encuestas, reorder(IdTecnologiaPrincipal, -SalarioActualNeto, median))
+bwplot(bymedian ~ SalarioActualNeto, encuestas, horizontal = TRUE)
+
+# Se ve la relación entre sueldo y antiguedad alterada segun el sexo?
+qplot(Edad, SalarioNetoPorHora, data = subset(encuestas, IdSexo != "No informa"), color= IdSexo, fill = IdSexo, geom=c("point", "smooth"), facets = .~Anio, method="lm")
+
+# Relación entre salario y sexo segun
+qplot(SalarioNetoPorHora, data = encuestas, color= IdSexo, fill = IdSexo, facets = .~Anio)
+
+qplot(SalarioNetoPorHora, data = encuestas, color= IdSexo, fill = IdSexo, facets = .~IdNivelEducativo)
+
 ```
 
 
