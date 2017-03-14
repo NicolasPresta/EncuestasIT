@@ -222,8 +222,7 @@ El analisis será solo por un año en especifico.
 
 ```{r Filtrado de datos por año, echo=TRUE}
 
-#encuestasCompleto <- encuestas
-#encuestas <- subset(encuestas, as.POSIXlt(Fecha)$year + 1900 == 2016 )
+# encuestas2016 <- subset(encuestas, as.POSIXlt(Fecha)$year + 1900 == 2016 )
 
 ```
 
@@ -566,6 +565,35 @@ qplot(Edad, SalarioNetoPorHora, data = subset(encuestas, IdSexo != "No informa")
 qplot(SalarioNetoPorHora, data = encuestas, color= IdSexo, fill = IdSexo, facets = .~Anio)
 
 qplot(SalarioNetoPorHora, data = encuestas, color= IdSexo, fill = IdSexo, facets = .~IdNivelEducativo)
+
+# ----------------- ------------- ---------------
+
+encuestas2016 <- subset(encuestas, as.POSIXlt(Fecha)$year + 1900 == 2016 )
+
+encuestasDesarrolladores <- subset(encuestas2016, IdPuesto=="Desarrollador de software / Programador" |  IdPuesto=="Arquitecto" )
+encuestasDesarrolladores <- subset(encuestasDesarrolladores, IdProvincia=="Capital Federal")
+
+encuestasDesarrolladores[encuestasDesarrolladores$Semestre == "Primer",]$SalarioActualNeto <- encuestasDesarrolladores[encuestasDesarrolladores$Semestre == "Primer",]$SalarioActualNeto * 1.35
+encuestasDesarrolladores[encuestasDesarrolladores$Semestre == "Segundo",]$SalarioActualNeto <- encuestasDesarrolladores[encuestasDesarrolladores$Semestre == "Segundo",]$SalarioActualNeto * 1.15
+
+encuestasDesarrolladoresNet <- subset(encuestasDesarrolladores, IdTecnologiaPrincipal == ".Net")
+
+# Distribución salarial por experiencia, llevado a valores de marzo 2017, para desarrolladores y arquitectos en .net
+bymedian <- with(encuestasDesarrolladores, reorder(Experiencia, -SalarioActualNeto, median))
+bwplot(bymedian ~ SalarioActualNeto, encuestasDesarrolladores, horizontal = TRUE, main = "Distribución salarial por experiencia, llevado a valores de marzo 2017, para desarrolladores y arquitectos")
+
+# Distribución salarial por experiencia, llevado a valores de marzo 2017, para desarrolladores y arquitectos en .net
+bymedian <- with(encuestasDesarrolladoresNet, reorder(Experiencia, -SalarioActualNeto, median))
+bwplot(bymedian ~ SalarioActualNeto, encuestasDesarrolladoresNet, horizontal = TRUE, main = "Distribución salarial por experiencia, llevado a valores de marzo 2017, para desarrolladores y arquitectos en .net")
+
+ggplot(encuestasDesarrolladores,aes(x=SalarioActualNeto)) + 
+    geom_histogram(aes(fill=Experiencia)) + 
+    labs(title="Distribución de rangos salariales por semestre, para desarrolladores y arqui, a valores de marzo 2017") 
+
+
+ggplot(encuestasDesarrolladoresNet,aes(x=SalarioActualNeto)) + 
+    geom_histogram(aes(fill=Experiencia)) + 
+    labs(title="Distribución de rangos salariales por semestre, para desarrolladores y arqui .net, a valores de marzo 2017") 
 
 ```
 
