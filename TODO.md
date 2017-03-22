@@ -1,6 +1,9 @@
 ## TODO List
 
-[ ] Escribir CODEBOOK
+[ ] Completar README
+
+[ ] Escribir CODEBOOK con todas las variables del dataset limpio
+
 [ ] Definir preguntas que se van a querer contestar  
     -- Como es la distribución de salarios en función de:
             -- Sexo
@@ -16,4 +19,5 @@
     -- Visualizar tecnologias con mayor crecimiento y decrecimiento.
     -- Hay alguna relación entre el tamaño de la empresa y la satisfacción laboral?
     -- ...
-[ ] Mostrar variacion de datos geograficamente (mapa)
+    
+[ ] Mostrar variacion de datos geograficamente (en un mapa)
