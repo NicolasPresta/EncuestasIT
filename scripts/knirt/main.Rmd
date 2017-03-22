@@ -17,14 +17,14 @@ knitr::opts_chunk$set(
 
 # ----------------------  Importamos funciones  ----------------------  
 
-source("./funciones/quitarSaltosLineaComentarios.R")
-source("./funciones/cantidadOcurrenciasStr.R")
+source("../../funciones/quitarSaltosLineaComentarios.R")
+source("../../funciones/cantidadOcurrenciasStr.R")
 
 
 # ----------------------  Constantes  ----------------------  
 
-FILE_ENCUESTAS  <- "./datos/encuestas.txt"
-FILE_TABLAS  <- "./datos/tablas_anexas.txt"
+FILE_ENCUESTAS  <- "../../datos/encuestas.txt"
+FILE_TABLAS  <- "../../datos/tablas_anexas.txt"
 
 URL_ENCUESTAS <- "http://www.encuestasit.com/preguntas-frecuentes/descargar-encuestas"
 URL_TABLAS <- "http://www.encuestasit.com/preguntas-frecuentes/descargar-tablas-anexas"
@@ -141,8 +141,8 @@ Por ser una cantidad poco significativa no le vamos a dar tratamiento a esos reg
 ```{r grabación de archivos procesados}
 
 # Grabamos el procesado que hicimos hasta ahora
-write(renglonesInconsistentes, "./datos/encuestas_unclear.txt")
-write(renglonesConsistentes, "./datos/encuestas_clear.txt")
+write(renglonesInconsistentes, "../../datos/encuestas_unclear.txt")
+write(renglonesConsistentes, "../../datos/encuestas_clear.txt")
 
 ```
 
@@ -155,7 +155,7 @@ De aquí en más la variable *encuestas* será nuestra set de datos principal
 # ----------------------  Levantar DataFrame  ----------------------
 
 # Levantamos el archivo ya formateado, 
-encuestas <- read.csv("./datos/encuestas_clear.txt", quote = "")
+encuestas <- read.csv("../../datos/encuestas_clear.txt", quote = "")
 
 ```
 
