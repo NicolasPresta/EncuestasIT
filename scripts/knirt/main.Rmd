@@ -10,8 +10,9 @@ library(lattice)
 library(ggplot2)
 
 knitr::opts_chunk$set(echo = TRUE,
-                      message = TRUE,
-                      warning = TRUE)
+                      message = FALSE,
+                      warning = FALSE,
+                      cache = TRUE)
 
 # ----------------------  Importamos funciones  ----------------------
 
@@ -885,7 +886,7 @@ bwplot(
 
 ggplot(encuestasDesarrolladores, aes(x = SalarioActualNeto)) +
     geom_histogram(aes(fill = Experiencia)) +
-    labs(title = "Distribución de rangos salariales por semestre, para desarrolladores y arqui, a valores de marzo 2017")
+    labs(title = "Distribución de rangos salariales por semestre, para desarrolladores y arquitectos, a valores de marzo 2017")
 
 
 ggplot(encuestasDesarrolladoresNet, aes(x = SalarioActualNeto)) +
