@@ -506,14 +506,14 @@ ggplot(data = encuestas, aes(MesesEnElPuestoActual)) +
 cantAnomalosPorMesesEnPuestoActual <-
     cantRegistrosAntesLimpieza - cantAnomalosPorHorasTrabajadas - cantAnomalosPorEdad - dim(encuestas)[1]
 
-# todos los (salario actual neto >= 150000 o <= 7000) los vamos a considerar anomalas y vamos a desechar esos registros
+# todos los (salario actual neto >= 150000 o <= 3000) los vamos a considerar anomalas y vamos a desechar esos registros
 ggplot(data = encuestas, aes(SalarioActualNeto)) +
     geom_histogram(aes(y = ..density..)) +
     geom_density(col = 2) +
     labs(title = "Histograma de Salario actual neto - Antes de limpieza")
 
 encuestas <- encuestas[encuestas$SalarioActualNeto < 150000, ]
-encuestas <- encuestas[encuestas$SalarioActualNeto > 7000, ]
+encuestas <- encuestas[encuestas$SalarioActualNeto > 3000, ]
 
 ggplot(data = encuestas, aes(SalarioActualNeto)) +
     geom_histogram(aes(y = ..density..)) +
@@ -521,7 +521,7 @@ ggplot(data = encuestas, aes(SalarioActualNeto)) +
     labs(title = "Histograma de Salario actual neto - Después de limpieza")
 
 cantAnomalosPorSalarioActualNeto <-
-    cantRegistrosAntesLimpieza - cantAnomalosPorHorasTrabajadas - cantAnomalosPorEdad - cantAnomalosPorMesesEnPuestoActual - dim(encuestas)[1]
+    cantRegistrosAntesLimpieza - cantAnomalosPorHorasTrabajadas - cantAnomalosPorEdad -      cantAnomalosPorMesesEnPuestoActual - dim(encuestas)[1]
 
 
 # todos los (salario ideal neto >= 150000) los vamos a considerar anomalas y vamos a desechar esos registros
