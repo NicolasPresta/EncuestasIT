@@ -51,10 +51,10 @@ TODO
 
 ## Obtención de datos
 
-URL datos en crudo de las encuestas: `R URL_ENCUESTAS` 
-URL datos de tabulado de tablas auxiliares: `R URL_TABLAS`
+URL datos en crudo de las encuestas: `r URL_ENCUESTAS`   
+URL datos de tabulado de tablas auxiliares: `r URL_TABLAS`
 
-Estos archivos se guardarán localmente en `R FILE_ENCUESTAS` y `R FILE_TABLAS` respectivamente.
+Estos archivos se guardarán localmente en `r FILE_ENCUESTAS` y `r FILE_TABLAS` respectivamente.   
 
 
 ```{r descarga de datos}
@@ -131,9 +131,9 @@ renglonesConsistentes <-
 ```
 
 
-Cantidad de renglones total:`R length(txtdata)`
-Cantidad de renglones inconsistentes:`R length(renglonesInconsistentes)`
-Cantidad de renglones consistentes:`R length(renglonesConsistentes)`
+Cantidad de renglones total:`r length(txtdata)`  
+Cantidad de renglones inconsistentes:`r length(renglonesInconsistentes)`  
+Cantidad de renglones consistentes:`r length(renglonesConsistentes)`  
 
 Vemos que existen algunos registros que no se pueden formatear bien.
 Por ser una cantidad poco significativa no le vamos a dar tratamiento a esos registros por el momento.
@@ -548,16 +548,16 @@ cantRegistrosDespuesLimpieza <- dim(encuestas)[1]
 
 ```
 
-Cantidad de registros anomalos por edad: `R cantAnomalosPorEdad`
-Cantidad de registros anomalos por horas trabajadas: `R cantAnomalosPorHorasTrabajadas`
-Cantidad de registros anomalos por meses en el puesto actual: `R cantAnomalosPorMesesEnPuestoActual`
-Cantidad de registros anomalos por salario actual neto: `R cantAnomalosPorSalarioActualNeto`
-Cantidad de registros anomalos por salario ideal neto: `R cantAnomalosPorSalarioIdealNeto`
+Cantidad de registros anomalos por edad: `r cantAnomalosPorEdad`  
+Cantidad de registros anomalos por horas trabajadas: `r cantAnomalosPorHorasTrabajadas`  
+Cantidad de registros anomalos por meses en el puesto actual: `r cantAnomalosPorMesesEnPuestoActual`  
+Cantidad de registros anomalos por salario actual neto: `r cantAnomalosPorSalarioActualNeto`  
+Cantidad de registros anomalos por salario ideal neto: `r cantAnomalosPorSalarioIdealNeto`  
 
 
-Cantidad de registros antes de limpieza: `R cantRegistrosAntesLimpieza`
-Cantidad de registros despues de limpieza: `R cantRegistrosDespuesLimpieza`
-Cantidad de registros anomalos eliminados: `R (cantRegistrosAntesLimpieza - cantRegistrosDespuesLimpieza)`
+Cantidad de registros antes de limpieza: `r cantRegistrosAntesLimpieza`  
+Cantidad de registros despues de limpieza: `r cantRegistrosDespuesLimpieza`  
+Cantidad de registros anomalos eliminados: `r (cantRegistrosAntesLimpieza - cantRegistrosDespuesLimpieza)`  
 
 ## Creación de caracteristicas
 
@@ -688,8 +688,8 @@ encuestas <- droplevels(encuestas)
 
 ```
 
-Cantidad de registros anomalos por diferencia entre salario real e ideal : `R cantAnomalosPorDiferenciaRealIdeal`
-Cantidad de registros anomalos por salario neto por hora: `R cantAnomalosPorSalarioPorHora`
+Cantidad de registros anomalos por diferencia entre salario real e ideal : `r cantAnomalosPorDiferenciaRealIdeal`  
+Cantidad de registros anomalos por salario neto por hora: `r cantAnomalosPorSalarioPorHora`  
 
 ## Visualización de caracteristicas principales
 
