@@ -1,0 +1,200 @@
+---
+title: "TP2-IA-RNA"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+
+# --- Include de Librerias --- 
+library(knitr)
+library(lattice)
+library(ggplot2)
+library(caret)
+library(nnet)
+library(neuralnet)
+library(devtools)
+source_url('https://gist.githubusercontent.com/fawda123/7471137/raw/466c1474d0a505ff044412703516c34f1a4684a5/nnet_plot_update.r')
+
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE,
+                      warning = FALSE)
+
+
+```
+
+## TP 2 - Inteligencia Artificial - UTN FRBA
+
+
+Los datos se obtienen de las encuestas recolectadas por el sitio http://www.encuestasit.com/  
+Los datos en crudo de las encuestas están disponibles en el sitio, en la sección de Preguntas Frecuentes.  
+Para este analisis solo se tienen en cuenta las encuestas de 2016.  
+
+Links:
+ - http://www.kdnuggets.com/2016/08/begineers-guide-neural-networks-r.html/2
+
+### Resumen:
+Descripción de lo que se encontrará en el trabajo práctico, detallando el objetivo del trabajo  
+
+### Introducción:
+Descripción del problema que se desea resolver, indicando su relevancia y características.
+
+### Elementos del Trabajo y Metodología:
+
+- Modelo de RNA utilizada con la justificación de su elección.
+- Arquitectura y topología final de la RNA.
+- Descripción de los patrones utilizados para el entrenamiento y la validación de la RNA (por lo menos se debe utilizar un 25% de los patrones disponibles para la validación).
+- Herramientas, lenguajes y/o librerías seleccionadas para la implementación de la RNA.
+- En caso de haber utilizado varios prototipos, las características de las principales versiones utilizadas.
+
+### Resultados:
+
+- El error general obtenido en el entrenamiento de la RNA.
+- Los resultados obtenidos al aplicar en la RNA entrenada los patrones de validación (correctos y/o incorrectos). Para ello, se debe utilizar una tabla que indique por cada patrón:
+  - los datos de entrada ingresados,
+  - la salida generada por la RNA,
+  - la salida esperada para los datos de entrada, y 
+  - la comparación entre la salida esperada y la generada.
+
+### Discusión:
+Análisis de los resultados obtenidos en la sección anterior. Para ello, se puede
+evaluar de los resultados según dos perspectivas:
+ - ¿El Sistema Inteligente propuesto resuelve satisfactoriamente el problema? En el caso en que el resultado no fuese satisfactorio, indique posibles causas y proponga cursos de acción.
+ - ¿Cómo se compara con otras arquitecturas?
+
+
+### Conclusión:
+ - Conclusiones de la implementación del Sistema Inteligente.
+ - Relación entre los resultados, el modelo utilizado y la teoría vista en clase.
+ - Descripción de los problemas encontrados durante la implementación (si hubo alguno) y las estrategias de resolución aplicadas.
+
+
+### Referencias:
+ - Cita de bibliografía consultada, tanto escrita como digital (tal como una página web).
+ - Cita de otras fuentes teóricas, datos, técnicas y cualquier otra cosa que se haya utilizado para la realización del trabajo práctico.
+ 
+ 
+
+## Carga de los datos  
+
+```{r cargar datos}
+# ----------------------  Levantar DataFrame  ----------------------
+
+# Levantamos el archivo ya formateado,
+encuestas <- read.csv("./encuestas.csv")
+encuestas$X <- NULL
+
+```
+
+### resumen de datos
+
+Visualizamos un resumen de los datos que vamos a usar para esta clasificación.
+
+```{r resumen de datos}
+# ----------------------  imprimir resumen de campos  ----------------------
+
+str(encuestas)
+
+# ----------------------   primeros campos  ---------------------- 
+kable(head(encuestas))
+
+```
+
+### Preprocesado de datos
+
+La columna a predecir "IdSexo" tiene los siguientes valores:  
+ - 0 = Masculino
+ - 1 = Femenino
+ 
+Todos las columnas de tipo "Factor" (Enumeración) las llevamos a int (entero)
+
+    
+```{r Preprocesado de datos}
+
+# Output
+UniversitarioCompleto <- as.numeric(encuestas$IdNivelEducativo == "Universitario completo")
+encuestas$IdNivelEducativo <- NULL
+
+# Convercion de Enums a Int
+encuestas$IdSexo <- as.numeric(encuestas$IdSexo)
+encuestas$IdTipoDeEmpresa <- as.numeric(encuestas$IdTipoDeEmpresa)
+encuestas$IdProvincia <- as.numeric(encuestas$IdProvincia)
+encuestas$IdPuesto <- as.numeric(encuestas$IdPuesto)
+encuestas$IdTecnologiaPrincipal <- as.numeric(encuestas$IdTecnologiaPrincipal)
+encuestas$CargaLaboral <- as.numeric(encuestas$CargaLaboral)
+
+
+
+# Escalado entre 0 y 1
+range01 <- function(x){(x-min(x))/(max(x)-min(x))}
+encuestas <- as.data.frame(sapply(encuestas, range01)) 
+
+```
+
+### separación en sets
+
+Selección de una submuestra de 450 (el 25% de los datos) para test
+El resto de los datos seràn de entrenamiento.
+
+```{r separación en sets}
+
+set.seed(101)
+indices <- sample(1:nrow(encuestas),size=450)
+
+entrenamiento_input <- encuestas[-indices,]
+entrenamiento_output = UniversitarioCompleto[-indices]
+entrenamiento <- entrenamiento_input
+entrenamiento$UniversitarioCompleto <- entrenamiento_output
+
+test_input <- encuestas[indices,]
+test_output <- UniversitarioCompleto[indices]
+
+
+```
+
+### Armado de la red neuronal
+
+```{r armado del modelo}
+
+# Outputs:
+nombres <- names(encuestas)
+
+# Inputs:
+f <- paste(nombres,collapse=' + ')
+f <- paste('UniversitarioCompleto ~',f)
+
+# Formula:
+f <- as.formula(f)
+
+# -------------------
+
+
+# Creación y entrenamiento de la red neuronal
+# nn <- neuralnet(f,entrenamiento,hidden=c(10,10,10),linear.output=FALSE,stepmax=1000)
+nn2 <- nnet(entrenamiento_input, entrenamiento_output,data=dat.in,size=10, maxit=1000)
+
+```
+### Evaluación del modelo
+
+```{r evaluación del modelo}
+
+# Calculamos las predicciones usando el modelo
+# predicciones <- compute(nn,test_input)
+predicciones <- predict(nn2, test_input)
+
+# Redondiamos la salida del modelo (si es > 0.5 lo consideramos 1)
+# predicciones <- sapply(predicciones$net.result,round,digits=0)
+predicciones <- sapply(predicciones,round,digits=0)
+
+# Validamos las predicciones con los valores reales.
+table(test_output,predicciones)
+
+```
+
+### Visualización del modelo
+
+```{r  Visualización del modelo}
+
+# plot(nn)
+plot.nnet(nn2)
+
+```
