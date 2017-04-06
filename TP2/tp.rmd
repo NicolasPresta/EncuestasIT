@@ -73,8 +73,9 @@ evaluar de los resultados según dos perspectivas:
  - Cita de otras fuentes teóricas, datos, técnicas y cualquier otra cosa que se haya utilizado para la realización del trabajo práctico.
  
  
+***
 
-## Carga de los datos  
+### Carga de los datos  
 
 ```{r cargar datos}
 # ----------------------  Levantar DataFrame  ----------------------
@@ -85,7 +86,7 @@ encuestas$X <- NULL
 
 ```
 
-### resumen de datos
+### Resumen de datos
 
 Visualizamos un resumen de los datos que vamos a usar para esta clasificación.
 
@@ -101,36 +102,34 @@ kable(head(encuestas))
 
 ### Preprocesado de datos
 
-La columna a predecir "IdSexo" tiene los siguientes valores:  
- - 0 = Masculino
- - 1 = Femenino
+Lo que vamos a intentar predecir es si el encuestado tiene más de 35 años  
+ - 0 = NO  
+ - 1 = SI  
  
 Todos las columnas de tipo "Factor" (Enumeración) las llevamos a int (entero)
 
-    
 ```{r Preprocesado de datos}
 
 # Output
-UniversitarioCompleto <- as.numeric(encuestas$IdNivelEducativo == "Universitario completo")
-encuestas$IdNivelEducativo <- NULL
+Output <- as.numeric(encuestas$Edad > 35)
+encuestas$Edad <- NULL
 
 # Convercion de Enums a Int
 encuestas$IdSexo <- as.numeric(encuestas$IdSexo)
+encuestas$IdNivelEducativo <- as.numeric(encuestas$IdNivelEducativo)
 encuestas$IdTipoDeEmpresa <- as.numeric(encuestas$IdTipoDeEmpresa)
 encuestas$IdProvincia <- as.numeric(encuestas$IdProvincia)
 encuestas$IdPuesto <- as.numeric(encuestas$IdPuesto)
 encuestas$IdTecnologiaPrincipal <- as.numeric(encuestas$IdTecnologiaPrincipal)
 encuestas$CargaLaboral <- as.numeric(encuestas$CargaLaboral)
 
-
-
 # Escalado entre 0 y 1
-range01 <- function(x){(x-min(x))/(max(x)-min(x))}
-encuestas <- as.data.frame(sapply(encuestas, range01)) 
+# range01 <- function(x){(x-min(x))/(max(x)-min(x))}
+# encuestas <- as.data.frame(sapply(encuestas, range01)) 
 
 ```
 
-### separación en sets
+### Separación en sets
 
 Selección de una submuestra de 450 (el 25% de los datos) para test
 El resto de los datos seràn de entrenamiento.
@@ -141,13 +140,12 @@ set.seed(101)
 indices <- sample(1:nrow(encuestas),size=450)
 
 entrenamiento_input <- encuestas[-indices,]
-entrenamiento_output = UniversitarioCompleto[-indices]
+entrenamiento_output = Output[-indices]
 entrenamiento <- entrenamiento_input
-entrenamiento$UniversitarioCompleto <- entrenamiento_output
+entrenamiento$Output <- entrenamiento_output
 
 test_input <- encuestas[indices,]
-test_output <- UniversitarioCompleto[indices]
-
+test_output <- Output[indices]
 
 ```
 
@@ -160,7 +158,7 @@ nombres <- names(encuestas)
 
 # Inputs:
 f <- paste(nombres,collapse=' + ')
-f <- paste('UniversitarioCompleto ~',f)
+f <- paste('Output ~',f)
 
 # Formula:
 f <- as.formula(f)
@@ -169,8 +167,8 @@ f <- as.formula(f)
 
 
 # Creación y entrenamiento de la red neuronal
-# nn <- neuralnet(f,entrenamiento,hidden=c(10,10,10),linear.output=FALSE,stepmax=1000)
-nn2 <- nnet(entrenamiento_input, entrenamiento_output,data=dat.in,size=10, maxit=1000)
+# nn <- neuralnet(f,entrenamiento,hidden=c(10,10,10),stepmax=1000)
+nn2 <- nnet(entrenamiento_input, entrenamiento_output,data=dat.in,size=10, maxit=10000, decay=0.001, reltol=FALSE)
 
 ```
 ### Evaluación del modelo
