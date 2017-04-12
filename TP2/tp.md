@@ -58,7 +58,7 @@ Análisis de los resultados obtenidos en la sección anterior. Para ello, se pue
 # ----------------------  Levantar DataFrame  ----------------------
 
 # Levantamos el archivo ya formateado,
-encuestas <- read.csv("./encuestas.csv")
+encuestas <- read.csv("./datos.csv")
 encuestas$X <- NULL
 ```
 
@@ -72,31 +72,208 @@ Visualizamos un resumen de los datos que vamos a usar para esta clasificación.
 str(encuestas)
 ```
 
-    ## 'data.frame':    1791 obs. of  10 variables:
-    ##  $ Edad                 : int  25 41 23 40 33 28 34 44 26 29 ...
-    ##  $ IdSexo               : Factor w/ 3 levels "Femenino","Masculino",..: 2 1 2 2 2 2 2 2 2 2 ...
-    ##  $ IdNivelEducativo     : Factor w/ 10 levels "Master o postgrado completo",..: 10 9 7 8 10 10 9 10 8 5 ...
-    ##  $ IdTipoDeEmpresa      : Factor w/ 7 levels "Mi propia empresa",..: 6 6 6 5 5 6 6 6 6 6 ...
-    ##  $ IdProvincia          : Factor w/ 25 levels "Buenos Aires",..: 3 2 3 3 3 8 3 2 3 3 ...
-    ##  $ IdPuesto             : Factor w/ 76 levels "Administrador de Almacenamiento (Storage)",..: 24 1 24 72 43 76 24 16 76 74 ...
-    ##  $ MesesDeExperiencia   : int  0 96 36 144 0 60 0 96 0 36 ...
-    ##  $ IdTecnologiaPrincipal: Factor w/ 57 levels ".Net","ActionScript",..: 4 1 24 23 26 23 1 54 23 57 ...
-    ##  $ CargaLaboral         : Factor w/ 4 levels "Extra Time","Full Time",..: 3 2 2 2 2 2 2 1 2 2 ...
-    ##  $ SalarioNetoPorHora   : num  406 419 238 560 564 ...
+    ## 'data.frame':    17940 obs. of  46 variables:
+    ##  $ Edad                               : int  32 34 52 37 26 31 39 33 30 31 ...
+    ##  $ IdSexo                             : Factor w/ 3 levels "Femenino","Masculino",..: 2 2 2 2 2 2 2 2 2 2 ...
+    ##  $ IdNivelEducativo                   : Factor w/ 10 levels "Master o postgrado completo",..: 10 10 9 10 10 7 9 9 10 10 ...
+    ##  $ IdTipoDeEmpresa                    : Factor w/ 7 levels "Mi propia empresa",..: 6 6 6 6 6 6 6 6 6 6 ...
+    ##  $ IdProvincia                        : Factor w/ 28 levels "Buenos Aires",..: 1 12 3 2 3 3 28 1 25 3 ...
+    ##  $ IdPuesto                           : Factor w/ 90 levels "Administrador de Almacenamiento (Storage)",..: 6 28 6 39 77 27 28 4 45 27 ...
+    ##  $ horasTrabajadasXSemana             : int  40 45 40 40 35 40 40 50 40 40 ...
+    ##  $ TrabajaDesdeCasa                   : Factor w/ 2 levels "No","Si": 1 1 1 1 1 2 2 1 1 1 ...
+    ##  $ LeGustaTrabajarDesdeCasa           : Factor w/ 2 levels "No","Si": 2 2 1 2 2 2 1 2 2 2 ...
+    ##  $ MesesDeExperiencia                 : int  96 36 144 96 12 12 36 60 6 60 ...
+    ##  $ IdTecnologiaPrincipal              : Factor w/ 65 levels ".Net","ActionScript",..: 41 1 41 20 41 29 36 36 53 45 ...
+    ##  $ MesesEnElPuestoActual              : int  36 36 0 36 28 18 30 60 24 24 ...
+    ##  $ SalarioActualNeto                  : int  6000 4500 4300 4750 3300 4900 3200 3900 3200 4500 ...
+    ##  $ SalarioIdealNeto                   : int  10000 7500 6500 6500 4100 6000 4500 5000 5000 6800 ...
+    ##  $ SeSientePresionado                 : int  0 0 0 0 0 0 0 0 10 0 ...
+    ##  $ SeSienteSobreexigido               : int  10 0 0 0 0 0 10 0 10 0 ...
+    ##  $ EnElLugarSeDesarrolla              : int  0 10 10 10 10 10 0 10 1 10 ...
+    ##  $ LaboresDiariasGratas               : int  10 10 10 10 0 10 10 10 0 10 ...
+    ##  $ SeLoReconoceComoDebiera            : int  10 10 10 0 10 10 0 0 0 10 ...
+    ##  $ HayDesarrolloProfesional           : int  10 10 10 0 0 10 10 0 0 0 ...
+    ##  $ SeSienteMotivado                   : int  10 10 10 0 0 10 10 0 0 0 ...
+    ##  $ RelacionConJefes                   : int  8 10 10 9 9 6 9 8 4 10 ...
+    ##  $ CambioPorMejorSalario              : Factor w/ 2 levels "No","Si": 2 2 1 2 2 2 2 2 2 2 ...
+    ##  $ CambioPorMejorAmbiente             : Factor w/ 2 levels "No","Si": 1 1 1 2 1 1 2 1 2 1 ...
+    ##  $ CambioPorFormaDeTrabajo            : Factor w/ 2 levels "No","Si": 1 2 1 2 2 1 2 2 2 2 ...
+    ##  $ CambioPorTecnologia                : Factor w/ 2 levels "No","Si": 1 1 1 2 2 1 2 2 1 2 ...
+    ##  $ NoCambio                           : Factor w/ 2 levels "False","True": 1 1 2 1 1 1 1 1 1 1 ...
+    ##  $ CantidadDeMesesParaCambiarDeTrabajo: int  NA 12 NA 1 1 12 12 1 12 12 ...
+    ##  $ NivelDeDesconfianza                : int  0 0 0 0 0 0 1 0 0 0 ...
+    ##  $ CambioPorCercania                  : Factor w/ 3 levels "No","No informa",..: 2 2 2 2 2 2 2 2 2 2 ...
+    ##  $ CambioPorMenorCargaHoraria         : Factor w/ 3 levels "No","No informa",..: 2 2 2 2 2 2 2 2 2 2 ...
+    ##  $ CambioPorOportunidadDeCarrera      : Factor w/ 3 levels "No","No informa",..: 2 2 2 2 2 2 2 2 2 2 ...
+    ##  $ TienePersonasACargo                : Factor w/ 3 levels "No","No informa",..: 2 2 2 2 2 2 2 2 2 2 ...
+    ##  $ RelaciónLaboral                    : int  NA NA NA NA NA NA NA NA NA NA ...
+    ##  $ Anio                               : int  2010 2010 2010 2010 2010 2010 2010 2010 2010 2010 ...
+    ##  $ Mes                                : int  6 6 6 6 6 6 6 6 6 6 ...
+    ##  $ Semestre                           : Factor w/ 2 levels "Primer","Segundo": 1 1 1 1 1 1 1 1 1 1 ...
+    ##  $ Hora                               : int  10 10 10 10 11 11 11 11 11 11 ...
+    ##  $ RangoHora                          : Factor w/ 5 levels "Madrugada","Mañana",..: 2 2 2 2 3 3 3 3 3 3 ...
+    ##  $ DiferenciaSalarioRealIdeal         : int  4000 3000 2200 1750 800 1100 1300 1100 1800 2300 ...
+    ##  $ SalarioNetoPorHora                 : num  150 100 107.5 118.8 94.3 ...
+    ##  $ RangoSalario                       : Factor w/ 5 levels "Alto","Bajo",..: 2 5 5 5 5 5 5 5 5 5 ...
+    ##  $ CargaLaboral                       : Factor w/ 4 levels "Extra Time","Full Time",..: 2 2 2 2 3 2 2 1 2 2 ...
+    ##  $ Antiguedad                         : Factor w/ 4 levels "Expert","Junior",..: 3 3 NA 3 3 2 3 4 3 3 ...
+    ##  $ Experiencia                        : Factor w/ 4 levels "Expert","Junior",..: 4 3 1 4 2 2 3 3 2 3 ...
+    ##  $ RangoEdad                          : Factor w/ 10 levels "(0,20]","(20,25]",..: 4 4 8 5 3 4 5 4 3 4 ...
+
+``` r
+summary(encuestas)
+```
+
+    ##       Edad              IdSexo     
+    ##  Min.   :18.00   Femenino  : 1859  
+    ##  1st Qu.:28.00   Masculino :14926  
+    ##  Median :32.00   No informa: 1155  
+    ##  Mean   :33.52                     
+    ##  3rd Qu.:38.00                     
+    ##  Max.   :65.00                     
+    ##                                    
+    ##                                  IdNivelEducativo
+    ##  Universitario en curso o incompleto     :6015   
+    ##  Universitario completo                  :4181   
+    ##  Terciario completo                      :3445   
+    ##  Terciario en curso o incompleto         :1397   
+    ##  Secundario completo                     :1107   
+    ##  Master o postgrado en curso o incompleto: 873   
+    ##  (Other)                                 : 922   
+    ##                       IdTipoDeEmpresa           IdProvincia  
+    ##  Mi propia empresa            :  381   Buenos Aires   :6817  
+    ##  No informa                   : 1376   Capital Federal:6695  
+    ##  Otro                         :  317   CÃ³rdoba       :1671  
+    ##  Soy independiente / freelance:  102   Sante Fe       : 710  
+    ##  Un organismo estatal         :  980   GBA Zona Norte : 453  
+    ##  Una empresa privada          :14726   Mendoza        : 321  
+    ##  Una ONG                      :   58   (Other)        :1273  
+    ##                                     IdPuesto    horasTrabajadasXSemana
+    ##  Desarrollador de software / Programador:4694   Min.   :20.00         
+    ##  Analista Funcional                     :1325   1st Qu.:40.00         
+    ##  Lider de Proyecto                      :1244   Median :40.00         
+    ##  Consultor TI                           : 890   Mean   :41.52         
+    ##  Soporte TÃ©cnico                       : 672   3rd Qu.:45.00         
+    ##  Gerente de Sistemas                    : 623   Max.   :96.00         
+    ##  (Other)                                :8492                         
+    ##  TrabajaDesdeCasa LeGustaTrabajarDesdeCasa MesesDeExperiencia
+    ##  No:14374         No: 5588                 Min.   :  0.00    
+    ##  Si: 3566         Si:12352                 1st Qu.: 36.00    
+    ##                                            Median : 60.00    
+    ##                                            Mean   : 65.58    
+    ##                                            3rd Qu.: 96.00    
+    ##                                            Max.   :144.00    
+    ##                                                              
+    ##  IdTecnologiaPrincipal MesesEnElPuestoActual SalarioActualNeto
+    ##  .Net   :3812          Min.   :  0.0         Min.   : 3011    
+    ##  Windows:2557          1st Qu.:  9.0         1st Qu.: 6000    
+    ##  Java   :2447          Median : 24.0         Median : 9000    
+    ##  Otro   :1338          Mean   : 33.9         Mean   :10811    
+    ##  Oracle :1086          3rd Qu.: 48.0         3rd Qu.:13500    
+    ##  SAP    :1047          Max.   :456.0         Max.   :70000    
+    ##  (Other):5653                                                 
+    ##  SalarioIdealNeto SeSientePresionado SeSienteSobreexigido
+    ##  Min.   :    0    Min.   : 0.000     Min.   : 0.000      
+    ##  1st Qu.: 8000    1st Qu.: 2.000     1st Qu.: 1.000      
+    ##  Median :12000    Median : 5.000     Median : 5.000      
+    ##  Mean   :14563    Mean   : 4.815     Mean   : 4.728      
+    ##  3rd Qu.:18000    3rd Qu.: 7.000     3rd Qu.: 7.000      
+    ##  Max.   :85000    Max.   :10.000     Max.   :10.000      
+    ##                                                          
+    ##  EnElLugarSeDesarrolla LaboresDiariasGratas SeLoReconoceComoDebiera
+    ##  Min.   : 0.0          Min.   : 0.000       Min.   : 0.000         
+    ##  1st Qu.: 3.0          1st Qu.: 5.000       1st Qu.: 3.000         
+    ##  Median : 6.0          Median : 7.000       Median : 5.000         
+    ##  Mean   : 6.1          Mean   : 6.744       Mean   : 5.265         
+    ##  3rd Qu.: 9.0          3rd Qu.:10.000       3rd Qu.: 8.000         
+    ##  Max.   :10.0          Max.   :10.000       Max.   :10.000         
+    ##                                                                    
+    ##  HayDesarrolloProfesional SeSienteMotivado RelacionConJefes
+    ##  Min.   : 0.000           Min.   : 0.000   Min.   : 0.000  
+    ##  1st Qu.: 2.000           1st Qu.: 2.000   1st Qu.: 6.000  
+    ##  Median : 5.000           Median : 5.000   Median : 8.000  
+    ##  Mean   : 5.141           Mean   : 5.316   Mean   : 7.212  
+    ##  3rd Qu.: 8.000           3rd Qu.: 8.000   3rd Qu.: 9.000  
+    ##  Max.   :10.000           Max.   :10.000   Max.   :10.000  
+    ##                                                            
+    ##  CambioPorMejorSalario CambioPorMejorAmbiente CambioPorFormaDeTrabajo
+    ##  No: 3411              No:12969               No:10042               
+    ##  Si:14529              Si: 4971               Si: 7898               
+    ##                                                                      
+    ##                                                                      
+    ##                                                                      
+    ##                                                                      
+    ##                                                                      
+    ##  CambioPorTecnologia  NoCambio     CantidadDeMesesParaCambiarDeTrabajo
+    ##  No:12661            False:15872   Min.   : 0.000                     
+    ##  Si: 5279            True : 2068   1st Qu.: 0.000                     
+    ##                                    Median : 6.000                     
+    ##                                    Mean   : 5.379                     
+    ##                                    3rd Qu.:12.000                     
+    ##                                    Max.   :12.000                     
+    ##                                    NA's   :5588                       
+    ##  NivelDeDesconfianza  CambioPorCercania CambioPorMenorCargaHoraria
+    ##  Min.   :0.0000      No        :10602   No        :10900          
+    ##  1st Qu.:0.0000      No informa: 3396   No informa: 3396          
+    ##  Median :0.0000      Si        : 3942   Si        : 3644          
+    ##  Mean   :0.2838                                                   
+    ##  3rd Qu.:0.0000                                                   
+    ##  Max.   :5.0000                                                   
+    ##                                                                   
+    ##  CambioPorOportunidadDeCarrera TienePersonasACargo RelaciónLaboral
+    ##  No        :6391               No        :9725     Min.   :0.00   
+    ##  No informa:3396               No informa:4603     1st Qu.:1.00   
+    ##  Si        :8153               Si        :3612     Median :1.00   
+    ##                                                    Mean   :1.02   
+    ##                                                    3rd Qu.:1.00   
+    ##                                                    Max.   :3.00   
+    ##                                                    NA's   :4603   
+    ##       Anio           Mes            Semestre          Hora      
+    ##  Min.   :2010   Min.   : 1.000   Primer :10291   Min.   : 0.00  
+    ##  1st Qu.:2011   1st Qu.: 2.000   Segundo: 7649   1st Qu.:10.00  
+    ##  Median :2013   Median : 6.000                   Median :13.00  
+    ##  Mean   :2013   Mean   : 5.497                   Mean   :13.26  
+    ##  3rd Qu.:2014   3rd Qu.: 8.000                   3rd Qu.:17.00  
+    ##  Max.   :2016   Max.   :12.000                   Max.   :23.00  
+    ##                                                                 
+    ##      RangoHora    DiferenciaSalarioRealIdeal SalarioNetoPorHora
+    ##  Madrugada:1381   Min.   :-4800              Min.   :  46.25   
+    ##  Mañana   :3789   1st Qu.: 1600              1st Qu.: 147.17   
+    ##  Mediodia :5006   Median : 3000              Median : 212.50   
+    ##  Noche    :2591   Mean   : 3752              Mean   : 263.14   
+    ##  Tarde    :4824   3rd Qu.: 5000              3rd Qu.: 325.00   
+    ##  NA's     : 349   Max.   :29500              Max.   :1425.00   
+    ##                                                                
+    ##    RangoSalario           CargaLaboral        Antiguedad  
+    ##  Alto    :3592   Extra Time     : 1390   Expert    :2304  
+    ##  Bajo    :2754   Full Time      :14902   Junior    :7672  
+    ##  Medio   :7328   Part Time      : 1256   SemiSenior:4600  
+    ##  Muy Alto:1493   Very Extra Time:  392   Senior    :3063  
+    ##  Muy Bajo:2772                           NA's      : 301  
+    ##  NA's    :   1                                            
+    ##                                                           
+    ##      Experiencia     RangoEdad   
+    ##  Expert    :3555   (30,35]:4866  
+    ##  Junior    :3282   (25,30]:4794  
+    ##  SemiSenior:7368   (35,40]:3023  
+    ##  Senior    :2829   (20,25]:2226  
+    ##  NA's      : 906   (40,45]:1455  
+    ##                    (45,50]: 836  
+    ##                    (Other): 740
 
 ``` r
 # ----------------------   primeros campos  ---------------------- 
 kable(head(encuestas))
 ```
 
-|  Edad| IdSexo    | IdNivelEducativo                    | IdTipoDeEmpresa      | IdProvincia      | IdPuesto                                  |  MesesDeExperiencia| IdTecnologiaPrincipal | CargaLaboral |  SalarioNetoPorHora|
-|-----:|:----------|:------------------------------------|:---------------------|:-----------------|:------------------------------------------|-------------------:|:----------------------|:-------------|-------------------:|
-|    25| Masculino | Universitario en curso o incompleto | Una empresa privada  | Capital Federal  | Desarrollador de software / Programador   |                   0| Android               | Part Time    |            406.2500|
-|    41| Femenino  | Universitario completo              | Una empresa privada  | CÃ³rdoba         | Administrador de Almacenamiento (Storage) |                  96| .Net                  | Full Time    |            418.6047|
-|    23| Masculino | Terciario completo                  | Una empresa privada  | Capital Federal  | Desarrollador de software / Programador   |                  36| Javascsript           | Full Time    |            237.7778|
-|    40| Masculino | Terciario en curso o incompleto     | Un organismo estatal | Capital Federal  | Scrum Master                              |                 144| Java                  | Full Time    |            560.2500|
-|    33| Masculino | Universitario en curso o incompleto | Un organismo estatal | Capital Federal  | Implementador de Sistemas                 |                   0| Mainframe             | Full Time    |            564.4737|
-|    28| Masculino | Universitario en curso o incompleto | Una empresa privada  | Costa AtlÃ¡ntica | Tester Funcional                          |                  60| Java                  | Full Time    |            375.0000|
+|  Edad| IdSexo    | IdNivelEducativo                    | IdTipoDeEmpresa     | IdProvincia     | IdPuesto                                |  horasTrabajadasXSemana| TrabajaDesdeCasa | LeGustaTrabajarDesdeCasa |  MesesDeExperiencia| IdTecnologiaPrincipal |  MesesEnElPuestoActual|  SalarioActualNeto|  SalarioIdealNeto|  SeSientePresionado|  SeSienteSobreexigido|  EnElLugarSeDesarrolla|  LaboresDiariasGratas|  SeLoReconoceComoDebiera|  HayDesarrolloProfesional|  SeSienteMotivado|  RelacionConJefes| CambioPorMejorSalario | CambioPorMejorAmbiente | CambioPorFormaDeTrabajo | CambioPorTecnologia | NoCambio |  CantidadDeMesesParaCambiarDeTrabajo|  NivelDeDesconfianza| CambioPorCercania | CambioPorMenorCargaHoraria | CambioPorOportunidadDeCarrera | TienePersonasACargo |  RelaciónLaboral|  Anio|  Mes| Semestre |  Hora| RangoHora |  DiferenciaSalarioRealIdeal|  SalarioNetoPorHora| RangoSalario | CargaLaboral | Antiguedad | Experiencia | RangoEdad |
+|-----:|:----------|:------------------------------------|:--------------------|:----------------|:----------------------------------------|-----------------------:|:-----------------|:-------------------------|-------------------:|:----------------------|----------------------:|------------------:|-----------------:|-------------------:|---------------------:|----------------------:|---------------------:|------------------------:|-------------------------:|-----------------:|-----------------:|:----------------------|:-----------------------|:------------------------|:--------------------|:---------|------------------------------------:|--------------------:|:------------------|:---------------------------|:------------------------------|:--------------------|----------------:|-----:|----:|:---------|-----:|:----------|---------------------------:|-------------------:|:-------------|:-------------|:-----------|:------------|:----------|
+|    32| Masculino | Universitario en curso o incompleto | Una empresa privada | Buenos Aires    | Administrador de Redes                  |                      40| No               | Si                       |                  96| Otro                  |                     36|               6000|             10000|                   0|                    10|                      0|                    10|                       10|                        10|                10|                 8| Si                    | No                     | No                      | No                  | False    |                                   NA|                    0| No informa        | No informa                 | No informa                    | No informa          |               NA|  2010|    6| Primer   |    10| Mañana    |                        4000|           150.00000| Bajo         | Full Time    | SemiSenior | Senior      | (30,35\]  |
+|    34| Masculino | Universitario en curso o incompleto | Una empresa privada | GBA Zona Oeste  | Director de Sistemas                    |                      45| No               | Si                       |                  36| .Net                  |                     36|               4500|              7500|                   0|                     0|                     10|                    10|                       10|                        10|                10|                10| Si                    | No                     | Si                      | No                  | False    |                                   12|                    0| No informa        | No informa                 | No informa                    | No informa          |               NA|  2010|    6| Primer   |    10| Mañana    |                        3000|           100.00000| Muy Bajo     | Full Time    | SemiSenior | SemiSenior  | (30,35\]  |
+|    52| Masculino | Universitario completo              | Una empresa privada | Capital Federal | Administrador de Redes                  |                      40| No               | No                       |                 144| Otro                  |                      0|               4300|              6500|                   0|                     0|                     10|                    10|                       10|                        10|                10|                10| No                    | No                     | No                      | No                  | True     |                                   NA|                    0| No informa        | No informa                 | No informa                    | No informa          |               NA|  2010|    6| Primer   |    10| Mañana    |                        2200|           107.50000| Muy Bajo     | Full Time    | NA         | Expert      | (50,55\]  |
+|    37| Masculino | Universitario en curso o incompleto | Una empresa privada | CÃ³rdoba        | Gerente de Operaciones                  |                      40| No               | Si                       |                  96| Delphi                |                     36|               4750|              6500|                   0|                     0|                     10|                    10|                        0|                         0|                 0|                 9| Si                    | Si                     | Si                      | Si                  | False    |                                    1|                    0| No informa        | No informa                 | No informa                    | No informa          |               NA|  2010|    6| Primer   |    10| Mañana    |                        1750|           118.75000| Muy Bajo     | Full Time    | SemiSenior | Senior      | (35,40\]  |
+|    26| Masculino | Universitario en curso o incompleto | Una empresa privada | Capital Federal | Otro                                    |                      35| No               | Si                       |                  12| Otro                  |                     28|               3300|              4100|                   0|                     0|                     10|                     0|                       10|                         0|                 0|                 9| Si                    | No                     | Si                      | Si                  | False    |                                    1|                    0| No informa        | No informa                 | No informa                    | No informa          |               NA|  2010|    6| Primer   |    11| Mediodia  |                         800|            94.28571| Muy Bajo     | Part Time    | SemiSenior | Junior      | (25,30\]  |
+|    31| Masculino | Terciario completo                  | Una empresa privada | Capital Federal | Desarrollador de software / Programador |                      40| Si               | Si                       |                  12| Java                  |                     18|               4900|              6000|                   0|                     0|                     10|                    10|                       10|                        10|                10|                 6| Si                    | No                     | No                      | No                  | False    |                                   12|                    0| No informa        | No informa                 | No informa                    | No informa          |               NA|  2010|    6| Primer   |    11| Mediodia  |                        1100|           122.50000| Muy Bajo     | Full Time    | Junior     | Junior      | (30,35\]  |
 
 ### Preprocesado de datos
 
@@ -160,134 +337,27 @@ f <- as.formula(f)
 
 # Creación y entrenamiento de la red neuronal
 # nn <- neuralnet(f,entrenamiento,hidden=c(10,10,10),stepmax=1000)
-nn2 <- nnet(entrenamiento_input, entrenamiento_output,data=dat.in,size=10, maxit=10000, decay=0.001, reltol=FALSE)
+# nn2 <- nnet(entrenamiento_input, entrenamiento_output,data=dat.in,size=10, maxit=10000, decay=0.001, reltol=FALSE)
 ```
-
-    ## # weights:  111
-    ## initial  value 333.538050 
-    ## iter  10 value 254.417972
-    ## iter  20 value 249.841742
-    ## iter  30 value 246.963512
-    ## iter  40 value 246.705567
-    ## iter  50 value 246.657109
-    ## iter  60 value 246.644219
-    ## iter  70 value 243.311958
-    ## iter  80 value 213.537345
-    ## iter  90 value 204.745557
-    ## iter 100 value 201.937323
-    ## iter 110 value 200.652062
-    ## iter 120 value 199.163740
-    ## iter 130 value 198.522586
-    ## iter 140 value 198.450369
-    ## iter 150 value 198.432550
-    ## iter 160 value 198.298942
-    ## iter 170 value 198.259807
-    ## iter 180 value 198.211917
-    ## iter 190 value 196.701796
-    ## iter 200 value 192.666646
-    ## iter 210 value 190.626866
-    ## iter 220 value 189.574490
-    ## iter 230 value 189.322017
-    ## iter 240 value 189.289234
-    ## iter 250 value 189.055484
-    ## iter 260 value 188.629325
-    ## iter 270 value 188.132740
-    ## iter 280 value 187.993449
-    ## iter 290 value 187.615429
-    ## iter 300 value 185.477059
-    ## iter 310 value 182.942118
-    ## iter 320 value 182.789999
-    ## iter 330 value 182.706325
-    ## iter 340 value 182.213797
-    ## iter 350 value 180.327659
-    ## iter 360 value 179.367445
-    ## iter 370 value 178.124867
-    ## iter 380 value 177.248945
-    ## iter 390 value 175.209450
-    ## iter 400 value 173.506264
-    ## iter 410 value 172.832471
-    ## iter 420 value 171.710562
-    ## iter 430 value 170.622612
-    ## iter 440 value 170.484835
-    ## iter 450 value 170.470514
-    ## iter 460 value 170.417073
-    ## iter 470 value 170.106823
-    ## iter 480 value 169.863543
-    ## iter 490 value 169.801245
-    ## iter 500 value 169.794941
-    ## iter 510 value 169.791767
-    ## iter 520 value 169.789530
-    ## iter 530 value 169.781333
-    ## iter 540 value 169.742893
-    ## iter 550 value 169.706828
-    ## iter 560 value 169.692149
-    ## iter 570 value 169.684332
-    ## iter 580 value 169.622890
-    ## iter 590 value 169.593619
-    ## iter 600 value 169.515430
-    ## iter 610 value 169.453714
-    ## iter 620 value 169.385005
-    ## iter 630 value 169.226479
-    ## iter 640 value 169.073521
-    ## iter 650 value 169.025528
-    ## iter 660 value 168.955856
-    ## iter 670 value 168.866760
-    ## iter 680 value 168.778288
-    ## iter 690 value 168.714585
-    ## iter 700 value 168.379398
-    ## iter 710 value 168.030955
-    ## iter 720 value 167.921640
-    ## iter 730 value 167.863845
-    ## iter 740 value 167.850692
-    ## iter 750 value 167.841882
-    ## iter 760 value 167.841244
-    ## iter 770 value 167.841156
-    ## iter 780 value 167.841129
-    ## iter 790 value 167.841126
-    ## iter 800 value 167.841124
-    ## iter 810 value 167.841124
-    ## iter 820 value 167.841123
-    ## iter 830 value 167.841123
-    ## iter 840 value 167.841123
-    ## iter 850 value 167.841123
-    ## iter 860 value 167.841123
-    ## iter 870 value 167.841123
-    ## iter 880 value 167.841123
-    ## iter 890 value 167.841123
-    ## iter 900 value 167.841123
-    ## iter 910 value 167.841123
-    ## iter 920 value 167.841123
-    ## iter 930 value 167.841123
-    ## iter 940 value 167.841123
-    ## iter 950 value 167.841123
-    ## final  value 167.841123 
-    ## converged
 
 ### Evaluación del modelo
 
 ``` r
 # Calculamos las predicciones usando el modelo
 # predicciones <- compute(nn,test_input)
-predicciones <- predict(nn2, test_input)
+# predicciones <- predict(nn2, test_input)
 
 # Redondiamos la salida del modelo (si es > 0.5 lo consideramos 1)
 # predicciones <- sapply(predicciones$net.result,round,digits=0)
-predicciones <- sapply(predicciones,round,digits=0)
+# predicciones <- sapply(predicciones,round,digits=0)
 
 # Validamos las predicciones con los valores reales.
-table(test_output,predicciones)
+# table(test_output,predicciones)
 ```
-
-    ##            predicciones
-    ## test_output   0   1
-    ##           0 221  39
-    ##           1  71 119
 
 ### Visualización del modelo
 
 ``` r
 # plot(nn)
-plot.nnet(nn2)
+# plot.nnet(nn2)
 ```
-
-![](tp_files/figure-markdown_github/Visualización%20del%20modelo-1.png)

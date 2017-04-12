@@ -81,7 +81,7 @@ evaluar de los resultados según dos perspectivas:
 # ----------------------  Levantar DataFrame  ----------------------
 
 # Levantamos el archivo ya formateado,
-encuestas <- read.csv("./encuestas.csv")
+encuestas <- read.csv("./datos.csv")
 encuestas$X <- NULL
 
 ```
@@ -94,6 +94,8 @@ Visualizamos un resumen de los datos que vamos a usar para esta clasificación.
 # ----------------------  imprimir resumen de campos  ----------------------
 
 str(encuestas)
+
+summary(encuestas)
 
 # ----------------------   primeros campos  ---------------------- 
 kable(head(encuestas))
@@ -168,7 +170,7 @@ f <- as.formula(f)
 
 # Creación y entrenamiento de la red neuronal
 # nn <- neuralnet(f,entrenamiento,hidden=c(10,10,10),stepmax=1000)
-nn2 <- nnet(entrenamiento_input, entrenamiento_output,data=dat.in,size=10, maxit=10000, decay=0.001, reltol=FALSE)
+# nn2 <- nnet(entrenamiento_input, entrenamiento_output,data=dat.in,size=10, maxit=10000, decay=0.001, reltol=FALSE)
 
 ```
 ### Evaluación del modelo
@@ -177,14 +179,14 @@ nn2 <- nnet(entrenamiento_input, entrenamiento_output,data=dat.in,size=10, maxit
 
 # Calculamos las predicciones usando el modelo
 # predicciones <- compute(nn,test_input)
-predicciones <- predict(nn2, test_input)
+# predicciones <- predict(nn2, test_input)
 
 # Redondiamos la salida del modelo (si es > 0.5 lo consideramos 1)
 # predicciones <- sapply(predicciones$net.result,round,digits=0)
-predicciones <- sapply(predicciones,round,digits=0)
+# predicciones <- sapply(predicciones,round,digits=0)
 
 # Validamos las predicciones con los valores reales.
-table(test_output,predicciones)
+# table(test_output,predicciones)
 
 ```
 
@@ -193,6 +195,6 @@ table(test_output,predicciones)
 ```{r  Visualización del modelo}
 
 # plot(nn)
-plot.nnet(nn2)
+# plot.nnet(nn2)
 
 ```
