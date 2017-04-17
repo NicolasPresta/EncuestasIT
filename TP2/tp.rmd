@@ -112,9 +112,15 @@ Todos las columnas de tipo "Factor" (Enumeración) las llevamos a int (entero)
 
 ```{r Preprocesado de datos}
 
+# Borramos caracteristicas que estan demasiado vinculadas a lo que vamos a predecir
+encuestas$SalarioActualNeto <- NULL
+encuestas$SalarioIdealNeto <- NULL
+encuestas$DiferenciaSalarioRealIdeal <- NULL
+encuestas$RangoSalario <- NULL
+
 # Output
-Output <- as.numeric(encuestas$Edad > 35)
-encuestas$Edad <- NULL
+Output <- encuestas$SalarioNetoPorHora
+encuestas$SalarioNetoPorHora <- NULL
 
 # Convercion de Enums a Int
 encuestas$IdSexo <- as.numeric(encuestas$IdSexo)
@@ -122,8 +128,35 @@ encuestas$IdNivelEducativo <- as.numeric(encuestas$IdNivelEducativo)
 encuestas$IdTipoDeEmpresa <- as.numeric(encuestas$IdTipoDeEmpresa)
 encuestas$IdProvincia <- as.numeric(encuestas$IdProvincia)
 encuestas$IdPuesto <- as.numeric(encuestas$IdPuesto)
+encuestas$TrabajaDesdeCasa <- as.numeric(encuestas$TrabajaDesdeCasa)
+encuestas$LeGustaTrabajarDesdeCasa <- as.numeric(encuestas$LeGustaTrabajarDesdeCasa)
+encuestas$CambioPorMejorSalario <- as.numeric(encuestas$CambioPorMejorSalario)
+encuestas$CambioPorMejorAmbiente <- as.numeric(encuestas$CambioPorMejorAmbiente)
+encuestas$CambioPorFormaDeTrabajo <- as.numeric(encuestas$CambioPorFormaDeTrabajo)
+encuestas$CambioPorTecnologia <- as.numeric(encuestas$CambioPorTecnologia)
+encuestas$NoCambio <- as.numeric(encuestas$NoCambio)
+encuestas$NivelDeDesconfianza <- as.numeric(encuestas$NivelDeDesconfianza)
+encuestas$CambioPorCercania <- as.numeric(encuestas$CambioPorCercania)
+encuestas$CambioPorMenorCargaHoraria <- as.numeric(encuestas$CambioPorMenorCargaHoraria)
+encuestas$CambioPorOportunidadDeCarrera <- as.numeric(encuestas$CambioPorOportunidadDeCarrera)
+encuestas$TienePersonasACargo <- as.numeric(encuestas$TienePersonasACargo)
+encuestas$RelaciónLaboral <- as.numeric(encuestas$RelaciónLaboral)
+encuestas$RangoHora <- as.numeric(encuestas$RangoHora)
+encuestas$CargaLaboral <- as.numeric(encuestas$CargaLaboral)
+encuestas$Antiguedad <- as.numeric(encuestas$Antiguedad)
+encuestas$Experiencia <- as.numeric(encuestas$Experiencia)
+encuestas$RangoEdad <- as.numeric(encuestas$RangoEdad)
 encuestas$IdTecnologiaPrincipal <- as.numeric(encuestas$IdTecnologiaPrincipal)
 encuestas$CargaLaboral <- as.numeric(encuestas$CargaLaboral)
+encuestas$Semestre <- as.numeric(encuestas$Semestre)
+
+# Los valores faltantes (NA) los ponemos en 0
+encuestas[is.na(encuestas$CantidadDeMesesParaCambiarDeTrabajo),]$CantidadDeMesesParaCambiarDeTrabajo <- 0
+encuestas[is.na(encuestas$RelaciónLaboral),]$RelaciónLaboral <- 0
+encuestas[is.na(encuestas$RangoHora),]$RangoHora <- 0
+encuestas[is.na(encuestas$Experiencia),]$Experiencia <- 0
+encuestas[is.na(encuestas$Antiguedad),]$Antiguedad <- 0
+
 
 # Escalado entre 0 y 1
 # range01 <- function(x){(x-min(x))/(max(x)-min(x))}
@@ -133,13 +166,12 @@ encuestas$CargaLaboral <- as.numeric(encuestas$CargaLaboral)
 
 ### Separación en sets
 
-Selección de una submuestra de 450 (el 25% de los datos) para test
-El resto de los datos seràn de entrenamiento.
+Selección de una submuestra del 80% para entrenamiento y 20% para test.
 
 ```{r separación en sets}
 
 set.seed(101)
-indices <- sample(1:nrow(encuestas),size=450)
+indices <- sample(1:nrow(encuestas),size=3588)
 
 entrenamiento_input <- encuestas[-indices,]
 entrenamiento_output = Output[-indices]
@@ -169,7 +201,13 @@ f <- as.formula(f)
 
 
 # Creación y entrenamiento de la red neuronal
-# nn <- neuralnet(f,entrenamiento,hidden=c(10,10,10),stepmax=1000)
+nn <- neuralnet(f,
+                entrenamiento,
+                hidden=c(50,20,5),
+                threshold = 0.01,
+                linear.output=TRUE,
+                stepmax=50000)
+
 # nn2 <- nnet(entrenamiento_input, entrenamiento_output,data=dat.in,size=10, maxit=10000, decay=0.001, reltol=FALSE)
 
 ```
@@ -178,7 +216,7 @@ f <- as.formula(f)
 ```{r evaluación del modelo}
 
 # Calculamos las predicciones usando el modelo
-# predicciones <- compute(nn,test_input)
+predicciones <- compute(nn,test_input)
 # predicciones <- predict(nn2, test_input)
 
 # Redondiamos la salida del modelo (si es > 0.5 lo consideramos 1)
@@ -194,7 +232,7 @@ f <- as.formula(f)
 
 ```{r  Visualización del modelo}
 
-# plot(nn)
+plot(nn)
 # plot.nnet(nn2)
 
 ```
