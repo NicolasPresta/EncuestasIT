@@ -25,30 +25,41 @@ knitr::opts_chunk$set(echo = TRUE,
 ## TP 2 - Inteligencia Artificial - UTN FRBA
 
 
-Los datos se obtienen de las encuestas recolectadas por el sitio http://www.encuestasit.com/  
-Los datos en crudo de las encuestas están disponibles en el sitio, en la sección de Preguntas Frecuentes.  
-Para este analisis solo se tienen en cuenta las encuestas de 2016.  
-
-Links:
- - http://www.kdnuggets.com/2016/08/begineers-guide-neural-networks-r.html/2
-
 ### Resumen:
-Descripción de lo que se encontrará en el trabajo práctico, detallando el objetivo del trabajo  
+En el presente trabajo se buscará desarrollar una tecnica de la inteligencia artificial para resolver la siguiente tarea: "Predecir el salario neto por hora de un empleado del sector tecnologico en Argentina en base a las caracteristicas del empleo y su desarrollo profesional". 
+Para esta tarea se implementará una red neuronal artificial donde el output será una aproximación al salario.
 
 ### Introducción:
-Descripción del problema que se desea resolver, indicando su relevancia y características.
+El mercado laboral del sector tecnologico argentino tiene caracteristicas muy particulares y resulta de especial interes, sobre todo para trabajadores y empleadores del sector, tener una vision más certera de como se mueve el mercado laboral. 
+Una de las caracteristicas de mayor interes es el salario de los empleados. 
+Para relevar esta información de mano directa de los empleados se creo la plataforma www.encuestasit.com, donde se encuesta a los empleados sobre las caracteristicas de su trabajo, su desarrollo profesional y su salario. Esta encuesta se realiza anualmente y luego se publican los resultados en el sitio. Ademas se suben los datos en crudo en formato csv.
+Para este trabajo solo se utilizarán datos del 2016.
+El objetivo es aproximar el salario neto por hora de un empleado en función de las caracteristicas del trabajo y del trabajador.
+
 
 ### Elementos del Trabajo y Metodología:
 
 - Modelo de RNA utilizada con la justificación de su elección.
+Se utilizará el modelo Backpropagation ya que es el que mejor se ajusta a la tareas de aproximación y clasificación. 
+
 - Arquitectura y topología final de la RNA.
+En principio una sola capa oculta de 20 neuronas. Esta limitación en el modelo corresponde más a limitaciones de infraestructura hardware necesaria para entrenar el modelo que a un ajuste que busque minimizar el error de la aproximación
+
+TODO 
+
 - Descripción de los patrones utilizados para el entrenamiento y la validación de la RNA (por lo menos se debe utilizar un 25% de los patrones disponibles para la validación).
+Se separa el dataset en 2 sub conjuntos: un conjunto de entrenamiento que contiene el 80% de los casos, elegidos aleatoreamente, que se utilizará para el entrenamiento. Y otro subconjunto de validación con el 20% de los casos restantes.
+
+
 - Herramientas, lenguajes y/o librerías seleccionadas para la implementación de la RNA.
+Se implementara en R, utilizando la libreria TODO
+
 - En caso de haber utilizado varios prototipos, las características de las principales versiones utilizadas.
 
 ### Resultados:
 
 - El error general obtenido en el entrenamiento de la RNA.
+
 - Los resultados obtenidos al aplicar en la RNA entrenada los patrones de validación (correctos y/o incorrectos). Para ello, se debe utilizar una tabla que indique por cada patrón:
   - los datos de entrada ingresados,
   - la salida generada por la RNA,
@@ -69,8 +80,12 @@ evaluar de los resultados según dos perspectivas:
 
 
 ### Referencias:
- - Cita de bibliografía consultada, tanto escrita como digital (tal como una página web).
+ - Cita de bibliografía consultada, tanto escrita como digital (tal como una página web).  
+    - http://www.kdnuggets.com/2016/08/begineers-guide-neural-networks-r.html/2
+    - https://www.r-bloggers.com/fitting-a-neural-network-in-r-neuralnet-package/
+
  - Cita de otras fuentes teóricas, datos, técnicas y cualquier otra cosa que se haya utilizado para la realización del trabajo práctico.
+    - Aplicación de algunos conceptos del curso https://www.coursera.org/learn/machine-learning
  
  
 ***
@@ -102,25 +117,22 @@ kable(head(encuestas))
 
 ```
 
-### Preprocesado de datos
+### Preprocesado de datos  
 
-Lo que vamos a intentar predecir es si el encuestado tiene más de 35 años  
- - 0 = NO  
- - 1 = SI  
+- Borramos caracteristicas que estan demasiado vinculadas a lo que vamos a predecir  
+- Separamos la columna a predecir (SalarioNetoPorHora)   
+- Todos las columnas de tipo "Factor" (Enumeración) las llevamos a int (entero)  
+- Los valores faltantes (NA) los ponemos en 0  
  
-Todos las columnas de tipo "Factor" (Enumeración) las llevamos a int (entero)
-
 ```{r Preprocesado de datos}
 
 # Borramos caracteristicas que estan demasiado vinculadas a lo que vamos a predecir
+# No las vamos a utilizar ya que queremos poder predecir el salario en base a
+# otras caracteristicas del empleo
 encuestas$SalarioActualNeto <- NULL
 encuestas$SalarioIdealNeto <- NULL
 encuestas$DiferenciaSalarioRealIdeal <- NULL
 encuestas$RangoSalario <- NULL
-
-# Output
-Output <- encuestas$SalarioNetoPorHora
-encuestas$SalarioNetoPorHora <- NULL
 
 # Convercion de Enums a Int
 encuestas$IdSexo <- as.numeric(encuestas$IdSexo)
@@ -157,10 +169,13 @@ encuestas[is.na(encuestas$RangoHora),]$RangoHora <- 0
 encuestas[is.na(encuestas$Experiencia),]$Experiencia <- 0
 encuestas[is.na(encuestas$Antiguedad),]$Antiguedad <- 0
 
-
 # Escalado entre 0 y 1
-# range01 <- function(x){(x-min(x))/(max(x)-min(x))}
-# encuestas <- as.data.frame(sapply(encuestas, range01)) 
+range01 <- function(x){(x-min(x))/(max(x)-min(x))}
+encuestas <- as.data.frame(sapply(encuestas, range01)) 
+
+# Output
+Output <- encuestas$SalarioNetoPorHora
+encuestas$SalarioNetoPorHora <- NULL
 
 ```
 
@@ -171,7 +186,7 @@ Selección de una submuestra del 80% para entrenamiento y 20% para test.
 ```{r separación en sets}
 
 set.seed(101)
-indices <- sample(1:nrow(encuestas),size=3588)
+indices <- sample(1:nrow(encuestas),size=round(0.2*nrow(encuestas)))
 
 entrenamiento_input <- encuestas[-indices,]
 entrenamiento_output = Output[-indices]
@@ -194,21 +209,21 @@ nombres <- names(encuestas)
 f <- paste(nombres,collapse=' + ')
 f <- paste('Output ~',f)
 
-# Formula:
+# Formula (Output en función de los inputs):
 f <- as.formula(f)
 
 # -------------------
 
 
 # Creación y entrenamiento de la red neuronal
-nn <- neuralnet(f,
-                entrenamiento,
-                hidden=c(50,20,5),
-                threshold = 0.01,
-                linear.output=TRUE,
-                stepmax=50000)
 
-# nn2 <- nnet(entrenamiento_input, entrenamiento_output,data=dat.in,size=10, maxit=10000, decay=0.001, reltol=FALSE)
+nn <- neuralnet(formula = f,                
+                data = entrenamiento,                
+                hidden=c(20),                
+                linear.output=TRUE,
+                stepmax = 50000)
+
+# nn2 <- nnet(entrenamiento_input, entrenamiento_output, data=dat.in, size=20,maxit=10000, decay=0.001,            reltol=FALSE)
 
 ```
 ### Evaluación del modelo
