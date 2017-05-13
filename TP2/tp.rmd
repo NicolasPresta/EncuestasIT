@@ -6,6 +6,15 @@ output: github_document
 ```{r setup, include=FALSE}
 
 # --- Include de Librerias --- 
+#install.packages("knitr")
+#install.packages("lattice")
+#install.packages("ggplot2")
+#install.packages("caret")
+#install.packages("nnet")
+#install.packages("neuralnet")
+#install.packages("devtools")
+#install.packages("rmarkdown")
+
 library(knitr)
 library(lattice)
 library(ggplot2)
