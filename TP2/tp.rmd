@@ -57,29 +57,46 @@ En principio una sola capa oculta de 20 neuronas. Esta limitación en el modelo 
 TODO 
 
 - Descripción de los patrones utilizados para el entrenamiento y la validación de la RNA (por lo menos se debe utilizar un 25% de los patrones disponibles para la validación).
-Se separa el dataset en 2 sub conjuntos: un conjunto de entrenamiento que contiene el 80% de los casos, elegidos aleatoreamente, que se utilizará para el entrenamiento. Y otro subconjunto de validación con el 20% de los casos restantes.
+Se separa el dataset en 2 sub conjuntos: un conjunto de entrenamiento que contiene el 70% de los casos, elegidos aleatoreamente, que se utilizará para el entrenamiento. Y otro subconjunto de validación con el 30% de los casos restantes.
 
 
 - Herramientas, lenguajes y/o librerías seleccionadas para la implementación de la RNA.
-Se implementara en R, utilizando la libreria TODO
+Se implementara en R, utilizando la libreria de redes neuronales llamada neuralnet
 
 - En caso de haber utilizado varios prototipos, las características de las principales versiones utilizadas.
+
+1) prueba con una sola capa de 10 neuronas. El error medio del modelo fue de $85
+2) prueba con 3 capas de 20 neuronas. El modelo no converge en la maxima iteración evaluada.
+3) prueba con 2 capas, la capa 1 de 12 neuronas y la capa 2 de 8 neuronas. El error medio fue de $65. Modelo elegido.
 
 ### Resultados:
 
 - El error general obtenido en el entrenamiento de la RNA.
+Para el conjunto de entrenamiento el error medio fue de $59
+Para el conjunto de test el error medio fue de $65
+
+El promedio de los salarios es de $261. Podemos decir que la predicción está en promedio en un +/- 24% del salario real. 
+
+La aproximación es lo suficientemente buena para al menos poder tener una idea del rango salarial de la persona.
+
+Ademas podemos analizar el histograma del error en la predicción, lo que nos da una idea más clara de como lo está haciendo nuestro modelo al predecir los salarios:
+
+TODO: Agregar histograma
+
+Vemos que es una distribuccion normal con centro en 0, y la gran mayoria de los casos están en el intervalo (-100; 100).
+
 
 - Los resultados obtenidos al aplicar en la RNA entrenada los patrones de validación (correctos y/o incorrectos). Para ello, se debe utilizar una tabla que indique por cada patrón:
-  - los datos de entrada ingresados,
-  - la salida generada por la RNA,
-  - la salida esperada para los datos de entrada, y 
-  - la comparación entre la salida esperada y la generada.
+TODO: Pegar tabla.
+
 
 ### Discusión:
 Análisis de los resultados obtenidos en la sección anterior. Para ello, se puede
 evaluar de los resultados según dos perspectivas:
  - ¿El Sistema Inteligente propuesto resuelve satisfactoriamente el problema? En el caso en que el resultado no fuese satisfactorio, indique posibles causas y proponga cursos de acción.
+    El modelo propuesto aproxima suficientemente bien el salario neto por hora. Se podria mejorar aun más aumentando la cantidad de iteraciones de entrenamiento en conjunto con una disminución del learning rate para aumentar las probabilidades de que el modelo converga en un minimo global.
  - ¿Cómo se compara con otras arquitecturas?
+    TODO: a que otras arquitecturas se refiere?
 
 
 ### Conclusión:
@@ -98,6 +115,8 @@ evaluar de los resultados según dos perspectivas:
  
  
 ***
+
+# Script en R (código fuente)
 
 ### Carga de los datos  
 
@@ -161,7 +180,7 @@ encuestas$CambioPorCercania <- as.numeric(encuestas$CambioPorCercania)
 encuestas$CambioPorMenorCargaHoraria <- as.numeric(encuestas$CambioPorMenorCargaHoraria)
 encuestas$CambioPorOportunidadDeCarrera <- as.numeric(encuestas$CambioPorOportunidadDeCarrera)
 encuestas$TienePersonasACargo <- as.numeric(encuestas$TienePersonasACargo)
-encuestas$RelaciónLaboral <- as.numeric(encuestas$RelaciónLaboral)
+encuestas$Relaci.nLaboral <- as.numeric(encuestas$Relaci.nLaboral)
 encuestas$RangoHora <- as.numeric(encuestas$RangoHora)
 encuestas$CargaLaboral <- as.numeric(encuestas$CargaLaboral)
 encuestas$Antiguedad <- as.numeric(encuestas$Antiguedad)
@@ -173,29 +192,48 @@ encuestas$Semestre <- as.numeric(encuestas$Semestre)
 
 # Los valores faltantes (NA) los ponemos en 0
 encuestas[is.na(encuestas$CantidadDeMesesParaCambiarDeTrabajo),]$CantidadDeMesesParaCambiarDeTrabajo <- 0
-encuestas[is.na(encuestas$RelaciónLaboral),]$RelaciónLaboral <- 0
+encuestas[is.na(encuestas$Relaci.nLaboral),]$Relaci.nLaboral <- 0
 encuestas[is.na(encuestas$RangoHora),]$RangoHora <- 0
 encuestas[is.na(encuestas$Experiencia),]$Experiencia <- 0
 encuestas[is.na(encuestas$Antiguedad),]$Antiguedad <- 0
+
+# Guardamos el max y min salario neto por hora, para poder reescalar el valor
+maxSal = max(encuestas$SalarioNetoPorHora)
+minSal = min(encuestas$SalarioNetoPorHora)
 
 # Escalado entre 0 y 1
 range01 <- function(x){(x-min(x))/(max(x)-min(x))}
 encuestas <- as.data.frame(sapply(encuestas, range01)) 
 
+
 # Output
 Output <- encuestas$SalarioNetoPorHora
 encuestas$SalarioNetoPorHora <- NULL
+
+# Borramos algunas caracteristicas a fin de simplificar el modelo
+encuestas$LeGustaTrabajarDesdeCasa <- NULL
+encuestas$CambioPorMejorAmbiente <- NULL
+encuestas$CambioPorFormaDeTrabajo <- NULL
+encuestas$CambioPorTecnologia <- NULL
+encuestas$NoCambio <- NULL
+encuestas$NivelDeDesconfianza <- NULL
+encuestas$CambioPorCercania <- NULL
+encuestas$CambioPorMenorCargaHoraria <- NULL
+encuestas$CambioPorOportunidadDeCarrera <- NULL
+encuestas$Relaci.nLaboral <- NULL
+encuestas$RangoHora <- NULL
+encuestas$Semestre <- NULL
 
 ```
 
 ### Separación en sets
 
-Selección de una submuestra del 80% para entrenamiento y 20% para test.
+Selección de una submuestra del 70% para entrenamiento y 30% para test.
 
 ```{r separación en sets}
 
 set.seed(101)
-indices <- sample(1:nrow(encuestas),size=round(0.2*nrow(encuestas)))
+indices <- sample(1:nrow(encuestas),size=round(0.3*nrow(encuestas)))
 
 entrenamiento_input <- encuestas[-indices,]
 entrenamiento_output = Output[-indices]
@@ -227,28 +265,57 @@ f <- as.formula(f)
 # Creación y entrenamiento de la red neuronal
 
 nn <- neuralnet(formula = f,                
-                data = entrenamiento,                
-                hidden=c(20),                
+                data = entrenamiento,
+                threshold = 0.1,
+                hidden=c(12,8),                
                 linear.output=TRUE,
-                stepmax = 50000)
-
-# nn2 <- nnet(entrenamiento_input, entrenamiento_output, data=dat.in, size=20,maxit=10000, decay=0.001,            reltol=FALSE)
+                stepmax = 20000)
 
 ```
 ### Evaluación del modelo
 
 ```{r evaluación del modelo}
 
-# Calculamos las predicciones usando el modelo
-predicciones <- compute(nn,test_input)
-# predicciones <- predict(nn2, test_input)
+# Calculamos las predicciones usando el modelo para el conjunto de TEST
+predicciones_test <- compute(nn,test_input)
 
-# Redondiamos la salida del modelo (si es > 0.5 lo consideramos 1)
-# predicciones <- sapply(predicciones$net.result,round,digits=0)
-# predicciones <- sapply(predicciones,round,digits=0)
+# Reescalamos los resultados (que estaban escalados al rango [0;1]) para que sean entendibles
+salariosPredichos_test <- predicciones_test$net.result * (maxSal - minSal) + minSal
+salariosReales_test <- test_output * (maxSal - minSal) + minSal
 
-# Validamos las predicciones con los valores reales.
-# table(test_output,predicciones)
+# Calculamos la diferencia entre el valor predicho y el valor real, en valor absoluto
+errorPrediccion_test <- salariosReales_test - salariosPredichos_test
+errorPrediccionAbs_test <- abs(errorPrediccion_test)
+
+# Calculamos la media del error
+errorPromedio_test <- mean(errorPrediccionAbs_test)
+salarioPromedioReal_test <- mean(salariosReales_test)
+salarioPromedioPredicho_test <- mean(salariosReales_test)
+
+hist(errorPrediccion_test, breaks = 300, main="Histograma del error en la predicción", xlim=c(-500, 500))
+
+# Armamos resumen con los primeros casos
+resumen <- test_input
+resumen$SalarioNetoPorHoraReal <- salariosReales_test
+resumen$SalarioNetoPorHoraPredicho <- salariosPredichos_test
+resumen$ErrorPrediccion <- errorPrediccion_test
+
+kable(head(resumen, 20))
+
+# Calculamos las predicciones usando el modelo para el conjunto de ENTRENAMIENTO
+predicciones_entrenamiento <- compute(nn,entrenamiento_input)
+
+# Reescalamos los resultados (que estaban escalados al rango [0;1]) para que sean entendibles
+salariosPredichos_entrenamiento <- predicciones_entrenamiento$net.result * (maxSal - minSal) + minSal
+salariosReales_entrenamiento <- entrenamiento_output * (maxSal - minSal) + minSal
+
+# Calculamos la diferencia entre el valor predicho y el valor real, en valor absoluto
+errorPrediccion_entrenamiento <- abs(salariosReales_entrenamiento - salariosPredichos_entrenamiento)
+
+# Calculamos la media del error
+errorPromedio_entrenamiento <- mean(errorPrediccion_entrenamiento)
+salarioPromedioReal_test <- mean(salariosReales_entrenamiento)
+salarioPromedioPredicho_test <- mean(salariosReales_entrenamiento)
 
 ```
 
@@ -257,6 +324,5 @@ predicciones <- compute(nn,test_input)
 ```{r  Visualización del modelo}
 
 plot(nn)
-# plot.nnet(nn2)
 
 ```
