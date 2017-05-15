@@ -26,7 +26,8 @@ source_url('https://gist.githubusercontent.com/fawda123/7471137/raw/466c1474d0a5
 
 knitr::opts_chunk$set(echo = TRUE,
                       message = FALSE,
-                      warning = FALSE)
+                      warning = FALSE, 
+                      cache = TRUE)
 
 
 ```
@@ -151,6 +152,8 @@ kable(head(encuestas))
 - Separamos la columna a predecir (SalarioNetoPorHora)   
 - Todos las columnas de tipo "Factor" (Enumeración) las llevamos a int (entero)  
 - Los valores faltantes (NA) los ponemos en 0  
+- Se escalan los valores entre 0 y 1
+- Se quitan algunas caracteristicas poco imporantes que no se tendrán en cuenta en el modelo
  
 ```{r Preprocesado de datos}
 
@@ -292,7 +295,8 @@ errorPromedio_test <- mean(errorPrediccionAbs_test)
 salarioPromedioReal_test <- mean(salariosReales_test)
 salarioPromedioPredicho_test <- mean(salariosReales_test)
 
-hist(errorPrediccion_test, breaks = 300, main="Histograma del error en la predicción", xlim=c(-500, 500))
+
+hist(errorPrediccion_test, breaks = 300, main="Histograma del error", xlim=c(-500, 500))
 
 # Armamos resumen con los primeros casos
 resumen <- test_input
@@ -300,7 +304,14 @@ resumen$SalarioNetoPorHoraReal <- salariosReales_test
 resumen$SalarioNetoPorHoraPredicho <- salariosPredichos_test
 resumen$ErrorPrediccion <- errorPrediccion_test
 
-kable(head(resumen, 20))
+# Imprimimos resultado de implementar el modelo a los casos de test. 
+# Para facilitar la lectura redondeamos en 2 decimales.
+round_df <- function(x, digits) {
+    numeric_columns <- sapply(x, mode) == 'numeric'
+    x[numeric_columns] <-  round(x[numeric_columns], digits)
+    x
+}
+kable(as.data.frame(t(head(round_df(resumen, 2), 10))))
 
 # Calculamos las predicciones usando el modelo para el conjunto de ENTRENAMIENTO
 predicciones_entrenamiento <- compute(nn,entrenamiento_input)
